@@ -1,5 +1,5 @@
 {
   "name": "response-style-direct",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "How Claude formats replies and authored documents: lead with the answer, bullets over prose, no filler, present tense."
 }
