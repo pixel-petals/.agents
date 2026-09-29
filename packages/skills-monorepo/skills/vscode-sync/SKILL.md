@@ -1,6 +1,6 @@
 ---
 name: vscode-sync
-description: Keeps .vscode/launch.json (including compounds that start a project's servers together) and .vscode/tasks.json in step with package.json scripts. Use whenever a package.json `scripts` entry is added, renamed, removed, or changed (root or any workspace package), including passthru scripts added for a new workspace package, and whenever editing .vscode launch configs, compounds, or tasks.
+description: Keeps .vscode/launch.json (including compounds that start a project's servers together) and .vscode/tasks.json in step with package.json scripts. Use whenever a package.json `scripts` entry is added, renamed, removed, or changed (root or any workspace package), including passthru scripts added for a new workspace package, and whenever editing .vscode launch configs, compounds, or tasks, or adding, removing, or moving a git submodule (package.code-workspace).
 ---
 
 # VS Code ↔ npm Scripts Sync
@@ -102,7 +102,29 @@ Watchers that only report problems, such as `tsc --watch`, don't belong in a com
 - The task calls an npm script (e.g. `"typecheck:watch": "tsc -p . --watch --pretty false"`), following the rule against inlining commands.
 - When there are several watchers, give each its own task and add one aggregate `watch` task with `runOn: folderOpen` that lists them all in `dependsOn`, with `"dependsOrder": "parallel"`.
 - VS Code asks once per workspace before running automatic tasks. That prompt is expected.
-- A compound can only name configs from its own workspace. If the project spans repos, it belongs in a `*.code-workspace` file that includes both.
+- A compound can only name configs from its own workspace. If the project spans repos, it belongs in the workspace file's `launch.compounds` (see [Workspace file](#workspace-file)).
+
+## Workspace file
+
+Every repo has a `package.code-workspace` at its root, which opens the repo and each of its submodules as its own folder.
+
+```jsonc
+{
+  "folders": [
+    { "name": "app.example", "path": "." },
+    { "name": "web.components", "path": "src/.submodules/web.components" },
+    { "name": "web.toolkit", "path": "src/.submodules/web.toolkit" }
+  ]
+}
+```
+
+- `folders[0]` is the repo root: `{ "name": "<repo name>", "path": "." }`.
+- After the root, list one folder for every submodule at any depth. Read `.gitmodules` recursively through nested submodules and dedupe by repository (the url's repo name). Keep the shallowest path. Name each folder after its repository, and use forward-slash paths relative to the root.
+- Order: org repos in dependency order (closest first), then third-party ones.
+- Leave `settings` out unless something is needed there that `.vscode/settings.json` doesn't already cover.
+- Compounds that span folders go in the file's `launch.compounds`. They name each config with its folder: `{ "name": "CMS (worker :8787)", "folder": "app.block-cms" }`. Add one only when a project needs a process from a submodule running. Say why in a comment.
+
+Keep the file in step with the submodules. When a submodule is added, removed, or moved, including one nested inside another submodule, update `folders`, and check that every workspace compound still names a folder and config that exist.
 
 ## On every script change
 
