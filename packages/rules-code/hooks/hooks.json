@@ -7,6 +7,36 @@
             "type": "command",
             "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code.md\"",
             "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-planning.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-planning.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-formatting.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-formatting.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-legibility.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-legibility.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-principles.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-principles.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-documentation.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-documentation.md\""
+          },
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-testing.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-testing.md\""
           }
         ]
       }
