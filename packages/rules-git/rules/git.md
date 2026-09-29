@@ -1,5 +1,12 @@
 # Using Git
 
+## Never Rewrite History
+
+- Never run commands that rewrite or discard git history: `filter-branch`, `filter-repo`, interactive rebase (`rebase -i`), `commit --amend` (unless the user explicitly asks for an amend), `reset --hard`, `push --force` (including `--force-with-lease`), or anything else that changes existing commit SHAs or discards commits/reflog entries.
+- This applies even to commits made earlier in the same session, even to fix a mistake (e.g. a wrong commit message, an unwanted trailer, an author field) — add a new commit instead.
+- Reason: a rewritten history is not always recoverable. Even when a reflog exists locally, a worktree, a fresh clone, or a differently-configured environment may not have it, and the loss is not something a later "undo" can fix.
+- If history genuinely looks wrong (bad commit, needs squashing, wrong author), stop and ask the user how they want it handled rather than fixing it yourself.
+
 ## Naming Pull Requests & Commits
 
 - Pull request names and commit messages should both follow the format:

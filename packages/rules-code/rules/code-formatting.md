@@ -56,3 +56,29 @@ Landing in the sweet spot is not a defense against the scope trigger — a focus
     - e.g. `graph.routes.js`, `graph.db.js`
 - When a cluster grows too large, or has more than one responsibility, it should be broken-down into sub-clusters.
   - Once a directory's files split into clearly distinct groups (e.g. db-graph's editor side vs its viewer side), each group gets its own subdirectory (`db-graph/editor/`, `db-graph/viewer/`), not files dangling at the parent cluster's root next to each other.
+
+#### Entry Point
+
+Every cluster folder has one file named after the folder (`sync/sync.js`). It is where a reader starts, and the only file other clusters import; everything else in the folder is its internals.
+
+#### One Scope per Filename
+
+A filename carries at most one scope after the cluster name. Two scopes mean a missing folder: `migrate.sync.members.js` is `sync/sync.members.js`.
+
+#### Folder Size
+
+A folder holds at most **5 source files** (specs, READMEs and data files don't count). A sixth means grouping the existing files into sub-clusters, not adding another sibling.
+
+This is the trigger that makes "too large" concrete. Twelve `migrate.<scope>.js` files side by side say nothing about where to start or how they relate; the same files grouped into four folders read as an outline.
+
+#### Group by Role, then by Feature
+
+When a cluster splits, its top-level subfolders name the role each group plays (`commands/`, `steps/`, `transforms/`), so the tree reads top-down in the order the code runs. Feature folders sit under the role that owns them.
+
+#### Dependencies Point One Way
+
+A file may import its own cluster's files, a sibling cluster's entry point, or shared helpers — never a sibling cluster's internals.
+
+#### Ordered Sequences
+
+Files that run in a fixed order (pipeline steps, migrations) get a numeric prefix (`01.move-class.js`) so the order is visible in the listing.
