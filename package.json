@@ -1,5 +1,5 @@
 {
-  "name": "@pixel-petals/agent",
+  "name": "@px-petals/org.agents",
   "version": "1.0.4",
   "private": true,
   "workspaces": [

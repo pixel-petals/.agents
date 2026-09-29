@@ -1,5 +1,5 @@
 {
-  "name": "@pixel-petals/rules-git",
+  "name": "@package/rules-git",
   "version": "1.0.4",
   "private": true
 }
