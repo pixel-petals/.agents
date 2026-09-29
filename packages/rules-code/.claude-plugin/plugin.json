@@ -1,5 +1,5 @@
 {
   "name": "rules-code",
   "version": "1.1.2",
-  "description": "Code formatting, legibility, principles, planning, documentation, and testing rules."
+  "description": "Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules."
 }

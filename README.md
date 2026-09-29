@@ -6,7 +6,7 @@ A plugin monorepo for AI coding agents. Each package is an installable plugin th
 
 | Plugin | Description |
 | --- | --- |
-| [`rules-code`](packages/rules-code/) | Code formatting, legibility, principles, planning, documentation, and testing rules |
+| [`rules-code`](packages/rules-code/) | Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules |
 | [`rules-git`](packages/rules-git/) | Git commit and pull request conventions |
 | [`response-style-direct`](packages/response-style-direct/) | How Claude formats its replies: lead with the answer, no filler, present tense |
 | [`skills-monorepo`](packages/skills-monorepo/) | Skills for repos made from `.template`: `monorepo-conventions`, `javascript`, `docs`, `github-ci`, `vscode-sync` |

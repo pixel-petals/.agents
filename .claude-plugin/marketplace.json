@@ -9,7 +9,7 @@
     {
       "name": "rules-code",
       "source": "./packages/rules-code",
-      "description": "Code formatting, legibility, principles, planning, documentation, and testing rules."
+      "description": "Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules."
     },
     {
       "name": "rules-git",

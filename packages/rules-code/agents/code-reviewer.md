@@ -12,6 +12,7 @@ Links:
 ## Responsibilities
 
 - Check changed code against [Design Principles](../rules/code-principles.md) (SOLID, YAGNI, KISS, DRY, COC, composition, LoD, pure programming, tell-don't-ask).
+- Check changed code against [Design Patterns](../rules/code-patterns.md): name a pattern the change should use where its trigger is present — an action reachable from several places without a command, components wired directly where an event bus belongs — and flag a pattern added where no trigger exists.
 - Check formatting against [Formatting](../rules/code-formatting.md).
 - Check tests against [Testing](../rules/code-testing.md) — AAA structure, interface-not-implementation, tests living near the code.
 - Check docs/comments against [Documentation](../rules/code-documentation.md).

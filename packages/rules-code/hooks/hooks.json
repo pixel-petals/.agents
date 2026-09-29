@@ -30,6 +30,11 @@
           },
           {
             "type": "command",
+            "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-patterns.md\"",
+            "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-patterns.md\""
+          },
+          {
+            "type": "command",
             "command": "cat \"$CLAUDE_PLUGIN_ROOT/rules/code-documentation.md\"",
             "commandWindows": "cat \"$env:CLAUDE_PLUGIN_ROOT/rules/code-documentation.md\""
           },
