@@ -1,5 +1,5 @@
 {
   "name": "skills-monorepo",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Monorepo skills: layout and naming, JavaScript and tsconfig, docs, GitHub CI, and VS Code script sync."
 }
