@@ -26,7 +26,11 @@ The textbook uses an abstract base class. The functional form takes the hooks as
  * @property {(rows: T[]) => Promise<void>} save
  */
 
-/** @template T @param {ImportHooks<T>} hooks */
+/**
+ * @template T
+ * @param    {ImportHooks<T>} hooks
+ * @returns  {(file: Blob) => Promise<{ ok: true, count: number } | { ok: false, errors: string[] }>}
+ */
 export function createImporter({ parse, validate = () => null, save }) {
   return async function importFile(file) {
     const rows = parse(await file.text())

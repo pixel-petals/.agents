@@ -24,17 +24,29 @@ In JavaScript the shared interface is usually a data shape plus functions that r
  * @property {Node[]} [children]   present on groups, absent on leaves
  */
 
-/** @param {Node} node @returns {number} */
+/**
+ * @param   {Node} node
+ * @returns {number}
+ */
 export const countNodes = node =>
   1 + (node.children ?? []).reduce((sum, child) => sum + countNodes(child), 0)
 
-/** A document is a list of top-level nodes; count across it. */
+/**
+ * A document is a list of top-level nodes; count across it.
+ *
+ * @param   {Node[]} nodes
+ * @returns {number}
+ */
 export const countDocument = nodes => nodes.reduce((sum, node) => sum + countNodes(node), 0)
 ```
 
 A composite of behaviour, not data — a group of commands that runs as one:
 
 ```js
+/**
+ * @param   {...{ run(): void }} items
+ * @returns {{ run(): void }}
+ */
 export const group = (...items) => ({
   run: () => items.forEach(item => item.run()),
 })
@@ -44,7 +56,7 @@ group(save, group(closePanel, clearSelection)).run()
 
 ## Keep in mind
 
-- Leaves carry no `children`, or an empty array — pick one and keep to it; mixing `undefined` and `[]` makes every walker check both.
+- Leaves carry no `children` — not an empty array. Mixing `undefined` and `[]` makes every walker check both.
 - Deep trees and recursion: past a few thousand levels, use an explicit stack.
 - Keep parent references out of the data unless needed. They make cloning and serialising harder.
 

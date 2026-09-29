@@ -32,19 +32,27 @@ export const localStore = {
 
 /** @type {Storage} */
 export const remoteStore = {
-  read: key => fetch(`/api/kv/${key}`).then(r => r.ok ? r.text() : null),
-  write: (key, value) => fetch(`/api/kv/${key}`, { method: 'PUT', body: value }).then(() => {}),
+  read: key => fetch(`/api/kv/${ key }`).then(r => r.ok ? r.text() : null),
+  write: (key, value) => fetch(`/api/kv/${ key }`, { method: 'PUT', body: value }).then(() => {}),
 }
 
-/** The "what": drafts over any storage. @param {Storage} storage */
+/**
+ * The "what": drafts over any storage.
+ *
+ * @param   {Storage} storage
+ * @returns {{ load(id: string): Promise<any>, save(id: string, draft: any): Promise<void> }}
+ */
 export const createDrafts = storage => ({
-  load: id => storage.read(`draft:${id}`).then(text => text && JSON.parse(text)),
-  save: (id, draft) => storage.write(`draft:${id}`, JSON.stringify(draft)),
+  load: id => storage.read(`draft:${ id }`).then(text => text && JSON.parse(text)),
+  save: (id, draft) => storage.write(`draft:${ id }`, JSON.stringify(draft)),
 })
 
-/** @param {Storage} storage */
+/**
+ * @param   {Storage} storage
+ * @returns {{ get(name: string): Promise<string | null> }}
+ */
 export const createSettings = storage => ({
-  get: name => storage.read(`setting:${name}`),
+  get: name => storage.read(`setting:${ name }`),
 })
 
 const drafts = createDrafts(navigator.onLine ? remoteStore : localStore)

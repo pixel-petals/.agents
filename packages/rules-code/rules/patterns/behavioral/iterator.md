@@ -17,13 +17,16 @@ Walk a collection one item at a time without the caller knowing how it is stored
 ## Shape
 
 ```js
-/** @param {Node} node @returns {Generator<Node>} */
+/**
+ * @param   {Node} node
+ * @returns {Generator<Node>}
+ */
 export function* walk(node) {
   yield node
   for (const child of node.children ?? []) yield* walk(child)
 }
 
-for (const node of walk(document)) {
+for (const node of walk(doc)) {
   if (node.type === 'image') images.push(node)
 }
 ```
@@ -31,7 +34,10 @@ for (const node of walk(document)) {
 Async sources use an async generator:
 
 ```js
-/** @returns {AsyncGenerator<Entry>} */
+/**
+ * @param   {{ list(query: { cursor?: string }): Promise<{ items: Entry[], next?: string }> }} api
+ * @returns {AsyncGenerator<Entry>}
+ */
 export async function* entries(api) {
   let cursor
   do {
@@ -49,7 +55,7 @@ for await (const entry of entries(api)) {
 ## Keep in mind
 
 - A generator runs lazily. Side effects inside it happen when the consumer pulls, not when it is called.
-- `Iterator.prototype` helpers (`.filter`, `.map`, `.take`) work on generators in current runtimes and stay lazy.
+- Iterator helpers (`.filter`, `.map`, `.take`) exist on sync iterators, generators included, and stay lazy. Async generators do not have them; loop with `for await` instead.
 - Mutating the collection during a walk is undefined behaviour in practice. Collect first, then mutate.
 
 ## Pairs with

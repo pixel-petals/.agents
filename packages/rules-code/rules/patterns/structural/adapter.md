@@ -24,18 +24,27 @@ A thin translation layer that gives an existing API the shape its caller expects
  * @property {number} height
  */
 
-/** Adapts the CMS media record to the shape the site renders. @returns {Media} */
+/**
+ * Adapts the CMS media record to the shape the site renders.
+ *
+ * @param   {any} record
+ * @returns {Media}
+ */
 export const fromCmsMedia = record => ({
   id: record.id,
   url: record.file.publicUrl,
-  width: record.meta?.dimensions?.[0] ?? 0,
-  height: record.meta?.dimensions?.[1] ?? 0,
+  width: record.meta?.dimensions?.[ 0 ] ?? 0,
+  height: record.meta?.dimensions?.[ 1 ] ?? 0,
 })
 ```
 
 An adapter over a callback API, giving it the promise shape callers use everywhere else:
 
 ```js
+/**
+ * @param   {string} path
+ * @returns {Promise<string>}
+ */
 export const readFile = path =>
   new Promise((resolve, reject) => legacyFs.read(path, (error, data) => error ? reject(error) : resolve(data)))
 ```
@@ -43,7 +52,7 @@ export const readFile = path =>
 ## Keep in mind
 
 - Adapt at the boundary, once. Data that crosses in the foreign shape spreads that shape through every caller.
-- An adapter translates; it does not add behaviour. Caching, retries or logging belong in a [decorator](decorator.md).
+- An adapter translates; it does not add behaviour. Memoising, retries or logging belong in a [decorator](decorator.md); controlling access belongs in a [proxy](proxy.md).
 
 ## Pairs with
 

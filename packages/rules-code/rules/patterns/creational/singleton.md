@@ -30,7 +30,7 @@ mountEditor(root, { store, events })
 export const logger = createLogger({ level: 'info' })
 ```
 
-This is still global state; the difference is that it is visible in an `import` line and trivially replaced with a test's module mock.
+This is still global state; the difference is that it is visible in an `import` line and easily replaced with a test's module mock.
 
 ## When it is acceptable
 
@@ -40,7 +40,7 @@ This is still global state; the difference is that it is visible in an `import` 
 
 ```js
 let connection
-export const getDb = () => (connection ??= openDatabase('app', 1))
+export const getDb = () => (connection ??= openDb('app', 1))
 ```
 
 Even then, prefer that the code using it receives it as an argument, so tests can hand in another.

@@ -16,7 +16,7 @@ A channel that carries facts from whoever caused them to whoever cares, so neith
 
 ## Rules
 
-- **`listen` returns its own unsubscribe.** No separate `off(name, fn)` that needs the same function reference kept around.
+- **Every subscribe (`listen` or `on`) returns its own unsubscribe.** No separate `off(name, fn)` that needs the same function reference kept around.
 - **Tie the unsubscribe to the owner's lifetime.** A component that listens in `connectedCallback` unsubscribes in `disconnectedCallback`; collect disposers with [`createDisposables`](../primitives.md#disposal-follows-ownership). A forgotten listener is a leak and a ghost handler.
 - **Do not rely on listener order.** Subscribers are notified in an order nobody should depend on. If B must run after A, that is a sequence, not two listeners.
 - **Events are facts, named in the past tense:** `page-saved`, `block-selected`. **Commands are requests, in the imperative:** `save-page`. A bus of imperatives is a command dispatcher in disguise, with no single owner of the action.
@@ -32,7 +32,7 @@ The shapes follow solid-primitives' `event-bus` package. Each stays small; pick 
 ```js
 /**
  * @template T
- * @returns {{ listen(fn: (payload: T) => void): () => void, emit(payload: T): void, clear(): void }}
+ * @returns  {{ listen(fn: (payload: T) => void): () => void, emit(payload: T): void, clear(): void }}
  */
 export function createEventBus() {
   /** @type {Set<(payload: T) => void>} */
@@ -41,10 +41,11 @@ export function createEventBus() {
   return {
     listen(fn) {
       listeners.add(fn)
+
       return () => listeners.delete(fn)
     },
     emit(payload) {
-      for (const fn of [...listeners]) fn(payload)
+      for (const fn of [ ...listeners ]) fn(payload)
     },
     clear() {
       listeners.clear()
@@ -53,7 +54,7 @@ export function createEventBus() {
 }
 ```
 
-Copying the set before iterating lets a listener unsubscribe itself mid-emit.
+`emit` walks a copy of the set, so a listener added during an emit does not run in that same emit — a listener that subscribes another cannot loop. The copy also means a listener removed mid-emit by an earlier one still receives this emit. (A listener removing itself would be safe without the copy: deleting the current item from a `Set` does not disturb iteration.)
 
 ### `createEmitter` — named, typed channels
 
@@ -61,39 +62,58 @@ Copying the set before iterating lets a listener unsubscribe itself mid-emit.
 /**
  * @typedef {object} EditorEvents
  * @property {{ id: string, savedAt: number }} page-saved
- * @property {{ id: string }} block-selected
- * @property {void} selection-cleared
+ * @property {{ id: string }}                  block-selected
+ * @property {void}                            selection-cleared
  */
 
 /**
  * @template {Record<string, any>} Events
+ * @typedef {object} Emitter
+ * @property {<K extends keyof Events>(name: K, fn: (payload: Events[ K ]) => void) => () => void} on
+ * @property {<K extends keyof Events>(name: K, payload: Events[ K ]) => void}                     emit
+ * @property {() => void}                                                                          clear
+ */
+
+/**
+ * @template {Record<string, any>} Events
+ * @returns  {Emitter<Events>}
  */
 export function createEmitter() {
-  /** @type {Map<keyof Events, Set<Function>>} */
+  /** @type {Map<keyof Events, Set<(payload: any) => void>>} */
   const channels = new Map()
 
-  /** @template {keyof Events} K */
-  function on(name, /** @type {(payload: Events[K]) => void} */ fn) {
+  /**
+   * @template {keyof Events} K
+   * @param    {K}                               name
+   * @param    {(payload: Events[ K ]) => void}  fn
+   * @returns  {() => void}
+   */
+  function on(name, fn) {
     if (!channels.has(name)) channels.set(name, new Set())
     channels.get(name).add(fn)
+
     return () => channels.get(name)?.delete(fn)
   }
 
-  /** @template {keyof Events} K */
-  function emit(name, /** @type {Events[K]} */ payload) {
-    for (const fn of [...(channels.get(name) ?? [])]) fn(payload)
+  /**
+   * @template {keyof Events} K
+   * @param    {K}            name
+   * @param    {Events[ K ]}  payload
+   */
+  function emit(name, payload) {
+    for (const fn of [ ...(channels.get(name) ?? []) ]) fn(payload)
   }
 
   return { on, emit, clear: () => channels.clear() }
 }
 
-/** @type {ReturnType<typeof createEmitter<EditorEvents>>} */
+/** @type {Emitter<EditorEvents>} */
 const events = createEmitter()
 ```
 
 ### Event hub
 
-A hub groups several single-channel buses under one object — `hub.saved.listen(...)`, `hub.selected.emit(...)` — and can offer a catch-all `hub.listen((name, payload) => …)` for logging or devtools. Use it when the channels are defined in one place and passed around together.
+A hub groups several single-channel buses under one object — `hub.saved.listen(...)`, `hub.selected.emit(...)` — and can offer a catch-all `hub.listen(({ name, details }) => …)` for logging or devtools. Use it when the channels are defined in one place and passed around together.
 
 ### Event stack
 
@@ -102,16 +122,26 @@ A bus that also keeps what it emitted: `emit` pushes onto a list, listeners rece
 ### `once` and `toPromise`
 
 ```js
-/** @template T @param {{ listen(fn: (p: T) => void): () => void }} bus */
+/**
+ * @template T
+ * @param    {{ listen(fn: (payload: T) => void): () => void }} bus
+ * @param    {(payload: T) => void}                            fn
+ * @returns  {() => void}
+ */
 export function once(bus, fn) {
   const off = bus.listen(payload => {
     off()
     fn(payload)
   })
+
   return off
 }
 
-/** @template T @returns {Promise<T>} */
+/**
+ * @template T
+ * @param    {{ listen(fn: (payload: T) => void): () => void }} bus
+ * @returns  {Promise<T>}
+ */
 export const toPromise = bus => new Promise(resolve => once(bus, resolve))
 
 await toPromise(saved) // continue after the next save
@@ -122,8 +152,14 @@ await toPromise(saved) // continue after the next save
 When one change fires many events — a paste inserts forty blocks — collect them and emit once per tick, or emit a single summary event (`blocks-inserted` with a list) rather than forty `block-inserted`. Listeners that re-render then run once.
 
 ```js
+/**
+ * @template T
+ * @param    {{ emit(items: T[]): void }} bus
+ * @returns  {(payload: T) => void}
+ */
 export function batched(bus) {
   let queue = []
+
   return payload => {
     queue.push(payload)
     if (queue.length > 1) return

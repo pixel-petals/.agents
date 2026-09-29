@@ -23,19 +23,30 @@ Each handler receives the context and a `next` to continue. Not calling `next` s
  * @typedef {(context: C, next: () => Promise<any>) => Promise<any>} Handler
  */
 
-/** @template C @param {Handler<C>[]} handlers */
-export function chain(handlers) {
+/**
+ * @template C
+ * @param    {Handler<C>[]} handlers
+ * @returns  {(context: C) => Promise<any>}
+ */
+export function createChain(handlers) {
   return context => {
+    let reached = -1
     const run = index => {
-      const handler = handlers[index]
-      return handler ? handler(context, () => run(index + 1)) : Promise.resolve()
+      if (index <= reached) return Promise.reject(new Error('next() called more than once'))
+      reached = index
+      const handler = handlers[ index ]
+      if (!handler) return Promise.reject(new Error('No handler took the request'))
+
+      return handler(context, () => run(index + 1))
     }
+
     return run(0)
   }
 }
 
 const requireAuth = async (ctx, next) => {
   if (!ctx.user) return new Response('Unauthorised', { status: 401 })
+
   return next()
 }
 
@@ -43,10 +54,11 @@ const timed = async (ctx, next) => {
   const start = performance.now()
   const result = await next()
   console.debug(ctx.url, performance.now() - start)
+
   return result
 }
 
-const handle = chain([timed, requireAuth, ctx => renderPage(ctx)])
+const handle = createChain([ timed, requireAuth, ctx => renderPage(ctx) ])
 ```
 
 Code after `await next()` runs on the way back out, so one handler can wrap the rest.
@@ -54,7 +66,8 @@ Code after `await next()` runs on the way back out, so one handler can wrap the 
 ## Keep in mind
 
 - Order is part of the contract. Build the list in one place where it can be read top to bottom.
-- A request that no handler takes should fail loudly, not vanish.
+- A request that no handler takes fails loudly: falling off the end rejects with `No handler took the request`, rather than resolving to nothing.
+- A handler calls `next` at most once. A second call rejects instead of running the rest of the chain again.
 
 ## Pairs with
 

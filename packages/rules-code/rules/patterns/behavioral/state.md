@@ -15,51 +15,65 @@ Behaviour that depends on a mode lives in one place per mode, and moving between
 
 ## Shape
 
-Following solid-primitives' `state-machine`: each state is a function that receives its input and a `to` transitioner and returns the state's value. Allowed transitions are declared beside it.
+Adapted from solid-primitives' `state-machine`. There, `createMachine({ initial, states })` takes each state as a function `(input, to) => value`, exposes `.type`, `.value` and `.to`, and checks transitions only in the types. Here each state is an object that also declares where it may go next, and the machine checks every transition at runtime.
 
 ```js
 /**
  * @typedef {'idle' | 'loading' | 'loaded' | 'failed'} Status
+ *
+ * @typedef {object} State
+ * @property {Status[]}                                                    to     the states it may move to
+ * @property {(input: any, to: Record<string, (input?: any) => void>) => any} value
  */
 
+/** @type {Record<Status, State>} */
 const states = {
-  idle: { to: ['loading'], value: () => ({ busy: false }) },
+  idle: { to: [ 'loading' ], value: () => ({ busy: false }) },
 
   loading: {
-    to: ['loaded', 'failed'],
+    to: [ 'loaded', 'failed' ],
     value: (url, to) => {
       fetch(url).then(r => r.json()).then(to.loaded, to.failed)
+
       return { busy: true }
     },
   },
 
-  loaded: { to: ['loading'], value: data => ({ busy: false, data }) },
-  failed: { to: ['loading'], value: error => ({ busy: false, error }) },
+  loaded: { to: [ 'loading' ], value: data => ({ busy: false, data }) },
+  failed: { to: [ 'loading' ], value: error => ({ busy: false, error }) },
 }
 
-export function createMachine(definition, initial) {
-  let name = initial
-  let value = enter(initial)
+/**
+ * @param   {{ initial: string, states: Record<string, State> }} definition
+ * @returns {{ readonly type: string, readonly value: any, to: Record<string, (input?: any) => void> }}
+ */
+export function createMachine({ initial, states }) {
+  let type = initial
+  let value
 
   function enter(next, input) {
-    const allowed = Object.fromEntries(definition[next].to.map(target => [target, arg => transition(target, arg)]))
-    return definition[next].value(input, allowed)
+    const allowed = Object.fromEntries(states[ next ].to.map(target => [ target, arg => transition(target, arg) ]))
+
+    return states[ next ].value(input, allowed)
   }
 
   function transition(next, input) {
-    if (!definition[name].to.includes(next)) throw new Error(`${name} → ${next} is not allowed`)
-    name = next
+    if (!states[ type ].to.includes(next)) throw new Error(`${ type } → ${ next } is not allowed`)
+    type = next
     value = enter(next, input)
   }
 
+  const to = Object.fromEntries(Object.keys(states).map(next => [ next, input => transition(next, input) ]))
+  value = enter(initial)
+
   return {
-    get state() { return name },
+    get type() { return type },
     get value() { return value },
-    to: new Proxy({}, { get: (_, next) => input => transition(next, input) }),
+    to,
   }
 }
 
-const request = createMachine(states, 'idle')
+const request = createMachine({ initial: 'idle', states })
 request.to.loading('/api/pages')
 ```
 
@@ -70,5 +84,4 @@ A lighter form is a discriminated union — `{ status: 'failed', error }` — wi
 ## Pairs with
 
 - [Strategy](strategy.md) — each state is a strategy; the difference is that states choose the next one.
-- [Proxy](../structural/proxy.md) — the `to` object above is one.
 - [Command](command.md) — `canRun` often reads the current state.

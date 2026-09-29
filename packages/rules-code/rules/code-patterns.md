@@ -27,9 +27,9 @@ These two come up in almost every interactive codebase. When their trigger appea
 | Many operations over a fixed set of node types, like a document tree | Visitor | [visitor](patterns/behavioral/visitor.md) |
 | An API has the wrong shape for its caller | Adapter | [adapter](patterns/structural/adapter.md) |
 | A subsystem is complicated to use for the common case | Facade | [facade](patterns/structural/facade.md) |
-| Behaviour is added around a function or object — logging, caching, retries | Decorator (wrapper) | [decorator](patterns/structural/decorator.md) |
+| Behaviour is added around a function or object — logging, memoising results, retries | Decorator (wrapper) | [decorator](patterns/structural/decorator.md) |
 | Parts and wholes are treated alike — trees of nodes | Composite | [composite](patterns/structural/composite.md) |
-| Access needs controlling — lazy loading, caching, permission, remote | Proxy | [proxy](patterns/structural/proxy.md) |
+| Access needs controlling — lazy loading, access control, remote objects | Proxy | [proxy](patterns/structural/proxy.md) |
 | Two dimensions vary independently, and subclassing would multiply them | Bridge | [bridge](patterns/structural/bridge.md) |
 | Very many similar objects cost too much memory | Flyweight | [flyweight](patterns/structural/flyweight.md) |
 | What to create is decided at runtime, or families must match | Factory | [factory](patterns/creational/factory.md) |
@@ -39,7 +39,7 @@ These two come up in almost every interactive codebase. When their trigger appea
 
 ## Small shapes worth reusing
 
-Debounce and throttle, disposal that follows ownership, listeners that clean up after themselves, promises from events, undo history from sources — see [primitives](patterns/primitives.md).
+Debounce and throttle, disposal that follows ownership, listeners that clean up after themselves, promises from events, undo history from sources, storage-backed state, cross-tab sync — see [primitives](patterns/primitives.md).
 
 ## Before adding one
 

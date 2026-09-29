@@ -27,10 +27,15 @@ export const sortBy = {
   manual: (a, b) => a.order - b.order,
 }
 
-/** @param {Page[]} pages @param {SortStrategy} strategy */
-export const sortPages = (pages, strategy) => [...pages].sort(strategy)
+/**
+ * @param   {Page[]}       pages
+ * @param   {SortStrategy} strategy
+ * @returns {Page[]}
+ */
+export const sortPages = (pages, strategy) => [ ...pages ].sort(strategy)
 
-sortPages(pages, sortBy[settings.sort] ?? sortBy.title)
+// Own keys only, so a setting of `constructor` or `toString` falls back instead of resolving through the prototype.
+sortPages(pages, Object.hasOwn(sortBy, settings.sort) ? sortBy[ settings.sort ] : sortBy.title)
 ```
 
 The caller picks; `sortPages` does not know how many strategies exist.

@@ -18,6 +18,7 @@ A snapshot of an object's state, taken by the object itself and handed back late
 The owner produces and consumes the snapshot. Callers hold it but do not look inside.
 
 ```js
+/** @returns {{ type(input: string): void, snapshot(): object, restore(memento: object): void }} */
 export function createEditor() {
   let text = ''
   let cursor = 0
@@ -55,4 +56,4 @@ editor.restore(before)
 
 - [Command](command.md) — the command takes the snapshot in `run` and restores it in `undo`.
 - [Prototype](../creational/prototype.md) — both copy state; a memento is for going back, a prototype for going forward.
-- [Undo history](../primitives.md#undo-history-from-sources) — each source returns a restore callback, which is a memento in closure form.
+- [Undo history](../primitives.md#undo-history-from-sources) — each source records an `{ undo, redo }` entry; its `undo` closure holds the value from before the change, which is a memento in closure form.

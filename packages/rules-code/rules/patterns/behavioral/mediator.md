@@ -12,7 +12,7 @@ One object owns how a group of components coordinate, so each component talks to
 
 - Two components talk. A direct call or a callback is clearer.
 - The participants only need to hear about something, with no rules deciding what happens next. Use an [event bus](event-bus.md).
-- The mediator would just forward every call unchanged. It adds a hop and no decision.
+- The mediator would forward every call unchanged. It adds a hop and no decision.
 
 ## Shape
 
@@ -20,7 +20,8 @@ Participants report what happened; the mediator decides what follows.
 
 ```js
 /**
- * @param {{ list: ListView, detail: DetailView, toolbar: Toolbar }} parts
+ * @param   {{ list: ListView, detail: DetailView, toolbar: Toolbar }} parts
+ * @returns {{ notify(event: string, payload?: any): void }}
  */
 export function createEditorMediator({ list, detail, toolbar }) {
   function notify(event, payload) {
@@ -46,7 +47,7 @@ export function createEditorMediator({ list, detail, toolbar }) {
 
 The list does not know the detail view exists. Swap the detail view and only the mediator changes.
 
-## Watch for
+## Keep in mind
 
 - **The god object.** A mediator that grows every rule in the app is the tangle moved into one file. Keep one per screen or feature.
 

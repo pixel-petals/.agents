@@ -23,13 +23,21 @@ In JavaScript, double dispatch collapses to a lookup on the node's `type`.
  * @typedef {{ [type: string]: (node: Node, visit: (node: Node) => R) => R }} Visitor
  */
 
-/** @template R @param {Visitor<R>} visitor @param {R} [fallback] */
+/**
+ * @template R
+ * @param    {Visitor<R>} visitor
+ * @param    {R}          [fallback]
+ * @returns  {(node: Node) => R}
+ */
 export function createVisit(visitor, fallback) {
   const visit = node => {
-    const handler = visitor[node.type]
-    if (!handler && fallback === undefined) throw new Error(`No handler for ${node.type}`)
+    // Own keys only, so a node typed `constructor` or `toString` is not "handled" by the prototype.
+    const handler = Object.hasOwn(visitor, node.type) ? visitor[ node.type ] : undefined
+    if (!handler && fallback === undefined) throw new Error(`No handler for ${ node.type }`)
+
     return handler ? handler(node, visit) : fallback
   }
+
   return visit
 }
 
@@ -39,7 +47,7 @@ const countWords = createVisit({
   image: () => 0,
 })
 
-countWords(document)
+countWords(doc)
 ```
 
 Each visitor chooses whether and how to recurse, so a pass can skip subtrees or change the traversal order.

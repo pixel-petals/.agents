@@ -21,7 +21,13 @@ import { expandReusable } from './reusable.js'
 import { resolveMedia } from './resolve.js'
 import { publish } from './publish.js'
 
-/** Everything a route needs to turn a slug into HTML. */
+/**
+ * Everything a route needs to turn a slug into HTML.
+ *
+ * @param   {string}                    slug
+ * @param   {{ loadEntries?: Function }} [options]
+ * @returns {Promise<string | null>}    null when there is no such page
+ */
 export async function renderPage(slug, { loadEntries } = {}) {
   const page = await fetchPage(slug)
   if (!page) return null

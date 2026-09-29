@@ -19,9 +19,13 @@ A function that decides what to create and returns it, so callers ask for a thin
 The default way to make an object in this codebase is a `createX` function returning an object of functions; its closure is the private state.
 
 ```js
-/** @param {{ start?: number }} [options] */
+/**
+ * @param   {{ start?: number }} [options]
+ * @returns {{ increment(): number, readonly value: number }}
+ */
 export function createCounter({ start = 0 } = {}) {
   let count = start
+
   return {
     increment: () => ++count,
     get value() { return count },
@@ -34,14 +38,19 @@ Choosing the kind at runtime — a registry keyed by type, which fails loudly on
 ```js
 /** @type {Record<string, (props: any) => HTMLElement>} */
 const blocks = {
-  heading: ({ text, level }) => Object.assign(document.createElement(`h${level}`), { textContent: text }),
+  heading: ({ text, level }) => Object.assign(document.createElement(`h${ level }`), { textContent: text }),
   image: ({ src, alt }) => Object.assign(document.createElement('img'), { src, alt }),
 }
 
+/**
+ * @param   {{ type: string, props: any }} node
+ * @returns {HTMLElement}
+ */
 export function createBlock(node) {
-  const make = blocks[node.type]
-  if (!make) throw new Error(`Unknown block type: ${node.type}`)
-  return make(node.props)
+  // Own keys only, so `constructor` or `toString` never resolve through the prototype.
+  if (!Object.hasOwn(blocks, node.type)) throw new Error(`Unknown block type: ${ node.type }`)
+
+  return blocks[ node.type ](node.props)
 }
 ```
 
@@ -49,17 +58,18 @@ A family — the abstract-factory form — is one object holding matching creato
 
 ```js
 export const themes = {
-  light: { icon: name => lightIcons[name], chart: data => createChart(data, lightPalette) },
-  dark: { icon: name => darkIcons[name], chart: data => createChart(data, darkPalette) },
+  light: { icon: name => lightIcons[ name ], chart: data => createChart(data, lightPalette) },
+  dark: { icon: name => darkIcons[ name ], chart: data => createChart(data, darkPalette) },
 }
 
-const ui = themes[preference]
+const ui = themes[ preference ]
 ```
 
 ## Keep in mind
 
-- Name factories `createX`. A reader then knows it returns a new thing each call.
+- Name a factory that builds a stateful object `createX`. A reader then knows it returns a new thing each call. A wrapper that adds behaviour to a function is named for what it adds instead — `withRetry`, `memoize`, `batched`, `observable`.
 - Throw on an unknown kind. A factory that returns `undefined` moves the failure somewhere harder to find.
+- Look kinds up with `Object.hasOwn` or a `Map`. A plain `registry[ type ]` finds `constructor` and `toString` on every object.
 
 ## Pairs with
 
