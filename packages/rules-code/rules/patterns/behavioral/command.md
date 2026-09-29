@@ -14,6 +14,8 @@ An action as data: an object with an id and a `run`, dispatched through one func
 
 - An action has one trigger and no undo. A plain function call is the command.
 - The "command" only forwards to a single function with the same arguments. That is a rename, not a pattern — see [YAGNI](../../principles/YAGNI.md).
+- Every sender already goes through one path — pure reducers applied by a single `commit`, or a store's single `dispatch`. That path is the dispatcher. Add ids and a registry only for what it cannot give: shortcut labels and disabled states derived from the bindings, a command palette, logging or replay.
+- Undo is already snapshot-based ([memento](memento.md)). Inverse operations beside it are a second, less exact undo.
 
 ## Roles
 

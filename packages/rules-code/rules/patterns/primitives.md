@@ -23,17 +23,38 @@ Rate-limit a function. Every variant returns the wrapped function with a `.clear
 
 /**
  * @template {(...args: any[]) => void} F
+ * @typedef {Limited<F> & { flush(): void }} Debounced
+ */
+
+/**
+ * @template {(...args: any[]) => void} F
  * @param    {F}      fn
  * @param    {number} wait
- * @returns  {Limited<F>}
+ * @returns  {Debounced<F>}
  */
 export function debounce(fn, wait) {
   let timer
-  const debounced = (...args) => {
+  let pending = null
+
+  const run = () => {
+    const args = pending
+
     clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), wait)
+    pending = null
+    if (args) fn(...args)
   }
-  debounced.clear = () => clearTimeout(timer)
+
+  const debounced = (...args) => {
+    pending = args
+    clearTimeout(timer)
+    timer = setTimeout(run, wait)
+  }
+
+  debounced.clear = () => {
+    clearTimeout(timer)
+    pending = null
+  }
+  debounced.flush = run
 
   return debounced
 }
@@ -171,6 +192,29 @@ The handlers are arrow-function class fields, so `this` is the element however t
 
 Disposal tears down in the reverse of the order it was built: what was set up later may depend on what came before it, so it goes first.
 
+A debounced write needs `flush()` wherever something reads what it writes: undo, save and "unsaved changes?" must flush pending typing first, and a page going hidden must flush a pending preference save. Without it, the read sees the state from before the last `wait` ms. `clear()` drops the pending call; `flush()` runs it now.
+
+## An in-flight guard
+
+A second call while an async action is still running gets the first call's promise, not a second request — a double-clicked Save, a retried submit. Keyed on the pending promise, not on a timer: a leading debounce guesses how long the action takes, and guesses wrong on a slow network.
+
+```js
+/**
+ * @template T
+ * @param    {() => Promise<T>} action
+ * @returns  {() => Promise<T>}
+ */
+export function oneAtATime(action) {
+  let running = null
+
+  return () => {
+    running ??= action().finally(() => { running = null })
+
+    return running
+  }
+}
+```
+
 ## Listeners that remove themselves
 
 An `AbortSignal` removes any number of DOM listeners at once. One controller per owner, aborted on disposal.
@@ -186,6 +230,12 @@ controller.abort() // both gone
 ```
 
 `fetch` takes the same signal, so one abort cancels listeners and in-flight requests together.
+
+Listeners on `document` or `window` outlive the element that added them unless something ends them. Every way out ends them:
+
+- **A gesture** — a drag, a resize, a press — ends on `pointerup`, `pointercancel` and Escape alike. Handling `pointerup` alone leaves the listeners behind when the browser cancels the pointer, and the next release anywhere acts on the stale press.
+- **The owner going away** ends them too: combine the gesture's own signal with its owner's, `AbortSignal.any([ gesture.signal, owner.signal ])`.
+- **A one-shot flag** — "swallow the click that ends this drag" — is a listener that removes itself after one event, and on the next `pointerdown` if that event never comes. A boolean field has no such exit and swallows some later, unrelated click.
 
 ## A promise from an event
 
