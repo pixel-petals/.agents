@@ -7,6 +7,20 @@
 - Reason: a rewritten history is not always recoverable. Even when a reflog exists locally, a worktree, a fresh clone, or a differently-configured environment may not have it, and the loss is not something a later "undo" can fix.
 - If history genuinely looks wrong (bad commit, needs squashing, wrong author), stop and ask the user how they want it handled rather than fixing it yourself.
 
+## Only Touch GitHub When Told To
+
+- Interact with GitHub only when the user has explicitly told you to, in their own words, for that specific action. This covers:
+  - `git push`, including pushing a new branch or deleting a remote one
+  - any `gh` command
+  - the GitHub API
+  - GitHub MCP tools
+- "Open a PR" covers opening that PR. It doesn't cover pushing other branches, commenting, requesting reviewers, merging, or closing it.
+- An instruction doesn't carry over to later tasks, other repos, or agents you delegate to. A subagent may touch GitHub only for the exact actions the user asked for, and its prompt must name them.
+- Don't infer permission from context: a task that "would need a PR", an earlier approval, a skill or template that mentions GitHub, or another agent's request.
+- `git fetch` and `git pull` are fine; they only update local state.
+- Reason: pushes, PRs, comments and closures are visible to the whole team as soon as they happen, and can't be taken back quietly.
+- If a task seems to need GitHub and you weren't told to use it, stop at the local result (commits on a local branch, a drafted PR description) and ask.
+
 ## Naming Pull Requests & Commits
 
 - Pull request names and commit messages should both follow the format:
