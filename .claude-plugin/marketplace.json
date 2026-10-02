@@ -25,6 +25,11 @@
       "name": "skills-monorepo",
       "source": "./packages/skills-monorepo",
       "description": "Monorepo skills: layout and naming, JavaScript and tsconfig, docs, GitHub CI, and VS Code script sync."
+    },
+    {
+      "name": "skills-roku",
+      "source": "./packages/skills-roku",
+      "description": "Roku skills: BrighterScript v1 typing and SceneGraph code, device-tested media behaviour, and testing on a real Roku."
     }
   ]
 }
