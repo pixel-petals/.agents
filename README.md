@@ -10,6 +10,7 @@ A plugin monorepo for AI coding agents. Each package is an installable plugin th
 | [`rules-git`](packages/rules-git/) | Git commit and pull request conventions |
 | [`response-style-direct`](packages/response-style-direct/) | How Claude formats its replies: lead with the answer, no filler, present tense |
 | [`skills-monorepo`](packages/skills-monorepo/) | Skills for repos made from `.template`: `monorepo-conventions`, `javascript`, `docs`, `github-ci`, `vscode-sync` |
+| [`skills-roku`](packages/skills-roku/) | Roku skills: `roku-standards` (architecture, framework patterns, anti-patterns), `roku` (BrighterScript v1 typing, device-tested media behaviour, testing on a real Roku) and `roku-adopt` (adoption-ladder audit) |
 
 ## Installation
 
@@ -23,6 +24,7 @@ Add this repo as a marketplace source, then install individual plugins:
 /plugin install rules-git@pixel-petals
 /plugin install response-style-direct@pixel-petals
 /plugin install skills-monorepo@pixel-petals
+/plugin install skills-roku@pixel-petals
 ```
 
 Or install directly from a local clone:
@@ -32,6 +34,7 @@ claude plugin install ./packages/rules-code
 claude plugin install ./packages/rules-git
 claude plugin install ./packages/response-style-direct
 claude plugin install ./packages/skills-monorepo
+claude plugin install ./packages/skills-roku
 ```
 
 ### In a repository
