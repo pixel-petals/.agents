@@ -111,7 +111,9 @@ branches; a `Utils.brs` where everything lives:
 ```brightscript
 ' @param {string} key
 ' @param {boolean} press
+'
 ' @return {boolean}
+'
 function onKeyEvent(key, press)
     if not press then return false
     if key = "back"
@@ -181,7 +183,9 @@ sub execute()
 end sub
 
 ' @param {roAssociativeArray} raw
+'
 ' @return {object}
+'
 function parseContent(raw)
     ' normalize once; screens never see data.attributes.*
     return {
@@ -257,7 +261,9 @@ can absorb today:
 
 ```brightscript
 ' Constants.brs
+'
 ' @return {object}
+'
 function AppConstants()
     return {
         API_BASE:  "https://api.prod.example.com/v2"    ' see Config for env switching
@@ -327,9 +333,11 @@ every call site made its own decisions; vendor SDK bugs crash feature code.
 *what happened*, only the facade knows vendors exist:
 
 ```brightscript
-' Analytics.brs
 ' @param {string} pageName
 ' @param {object} [context]
+'
+' Analytics.brs
+'
 sub trackPageView(pageName, context = {})
     payload = { pageName: pageName, ts: CreateObject("roDateTime").asSeconds() }
     payload.append(context)
@@ -372,6 +380,7 @@ flags:
 
 ```brightscript
 ' @param {string} direction
+'
 sub moveFocus(direction)
     ' the ONLY sub in this screen allowed to call setFocus()
     if direction = "down" and m.keyboard.isInFocusChain()
@@ -383,7 +392,9 @@ end sub
 
 ' @param {string} key
 ' @param {boolean} press
+'
 ' @return {boolean}
+'
 function onKeyEvent(key, press)
     if not press then return false
     if key = "up" or key = "down"
@@ -417,17 +428,21 @@ comprehension time — and gets "consistently" imitated.
 uses it, old `print`s convert only in lines you already touch:
 
 ```brightscript
-' Log.brs
 ' @param {dynamic} msg
+'
+' Log.brs
+'
 sub logInfo(msg)
     logAt(2, msg)
 end sub
 ' @param {dynamic} msg
+'
 sub logError(msg)
     logAt(0, msg)
 end sub
 ' @param {integer} level
 ' @param {dynamic} msg
+'
 sub logAt(level, msg)
     #if DEBUG
         levels = ["ERROR", "WARN", "INFO"]
@@ -460,11 +475,14 @@ unhandled because handling them is tedious in this shape.
 **Write instead — minimal version:** wrap the ceremony once:
 
 ```brightscript
-' TaskRunner.brs
 ' @param {string} taskType
 ' @param {object} fields
 ' @param {string} onDone
+'
+' TaskRunner.brs
+'
 ' @return {object}
+'
 function runTask(taskType, fields, onDone)
     task = CreateObject("roSGNode", taskType)
     task.update(fields, true)
@@ -500,7 +518,9 @@ bs_const=DEBUG=false;STAGING=false
 
 ```brightscript
 ' Config.brs
+'
 ' @return {object}
+'
 function getConfig()
     #if STAGING
         return { apiBase: "https://api.staging.example.com/v2", logLevel: 2 }

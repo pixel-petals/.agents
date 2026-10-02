@@ -114,22 +114,29 @@ only when touched:
    incantations, and the crashes when someone gets one wrong:
 
    ```brightscript
-   ' Guards.brs
    ' @param {dynamic} x
+   '
+   ' Guards.brs
+   '
    ' @return {boolean}
+   '
    function isValid(x)
        return type(x) <> "<uninitialized>" and x <> invalid
    end function
 
    ' @param {dynamic} x
+   '
    ' @return {boolean}
+   '
    function isNonEmptyString(x)
        return isValid(x) and getInterface(x, "ifString") <> invalid and x <> ""
    end function
 
    ' @param {dynamic} x
    ' @param {string} [subtype]
+   '
    ' @return {boolean}
+   '
    function isNode(x, subtype = "")
        if not isValid(x) or getInterface(x, "ifSGNodeChildren") = invalid then return false
        if subtype <> "" then return x.isSubtype(subtype)

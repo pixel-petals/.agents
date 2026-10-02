@@ -58,12 +58,14 @@ merge), which is the point — the value is the convention, not the code:
 
 ```brighterscript
 ' @return {object}
+'
 function getState()
     if m.state = invalid then m.state = {}
     return m.state
 end function
 
 ' @param {object} newState
+'
 sub setState(newState)
     getState().append(newState)
 end sub
@@ -99,8 +101,10 @@ doAction("fetch", { path: "/v2/trending" }).then(onTrending)
 ```
 
 ```brighterscript
-' actions/Fetch/fetch.brs — a complete action
 ' @param {object} args
+'
+' actions/Fetch/fetch.brs — a complete action
+'
 sub execute(args)
     waitFor({
         fetch: getGateway("content").send(buildRequest(args))
@@ -108,6 +112,7 @@ sub execute(args)
 end sub
 
 ' @param {object} completed
+'
 sub onWaitAllComplete(completed)
     resolve(completed.fetch)
 end sub
@@ -149,7 +154,9 @@ exists:
 
   ```brighterscript
   ' @param {string} called
+  '
   ' @return {dynamic}
+  '
   function getResponseHandler(called)
       if called = "query"     then return onQueryResponse
       if called = "getStream" then return onGetStream
@@ -194,6 +201,7 @@ sub init()
 end sub
 
 ' @param {object} payload
+'
 sub onPageView(payload)
     m.sdk.track("screen_view", { name: payload.type })
 end sub
@@ -259,6 +267,7 @@ sub onSearchText()
 end sub
 
 ' @param {string} text
+'
 sub search(text)
     if is.EQ(text, getState().searchText) then return
     setState({ searchText: text })

@@ -14,7 +14,7 @@ BrighterScript v1 is a type checker as much as a compiler: write code it can che
 ### Types
 
 - **Types go in JSDoc, never in signatures.** `' @param {motion.Sheet} sheet` and `' @return {float}`; the function line stays untyped. A value that does not match a signature's `as` type crashes Roku; it is never converted. bsc v1 validates JSDoc types in `.bs` exactly as it validates `as`.
-- **Every function gets a JSDoc block:** a one-line intent, then `@param {type} name  description` and `@return {type}  description`.
+- **Every function gets a JSDoc block:** `@param {type} name  description` lines, then the intent, then `@return {type}  description`, each section followed by a bare `'` line. The description must sit between the params and the return: bsc's intellisense misreads a description placed above the params (a bsc bug).
 - **Nullable returns say so:** `@return {motion.Media or invalid}`. Returning `invalid` from a `{motion.Media}` function is an error.
 - **Guards do not narrow.** After `if not is.invalid(x)` or `if is.string(x)`, bsc still sees the union. Guard with the `is.*` helpers (not raw `<> invalid` chains), then open the guarded block with `typecast x as T`, or cast inline with `x as T`. Both casts are compile-time only and vanish from the output.
 - **Never rely on a typed parameter to convert a number.** Integer, float and double compare directly; convert explicitly when a type must change.

@@ -23,6 +23,21 @@ BrighterScript is a superset of BrightScript that compiles to it. v1 adds a real
 
 - **Signatures stay untyped.** BrightScript enforces `as` on parameters and returns at runtime, and a mismatch crashes the channel rather than converting. JSDoc types are checked by bsc just as strictly, in `.bs` and `.brs` alike.
 - **JSDoc syntax:** `' @param {motion.Sheet} sheet  what it is`, optional parameters as `' @param {integer} [count]`, and `' @type {integer}` above a variable to type it (from the docs, which describe it for `.brs`; not tested here).
+- **Block order is params, description, return,** each section followed by a bare `'` line. bsc's intellisense misreads a description placed above the `@param` lines (a bsc bug), and the spacers keep the tags from running into the code:
+
+  ```brighterscript
+  ' @param {float[]} size  requested [width, height]; 0 means unset
+  ' @param {float} mediaWidth
+  ' @param {float} mediaHeight
+  '
+  ' Fits media into the requested bounds.
+  '
+  ' @return {motion.Size}
+  '
+  function bounds(size, mediaWidth, mediaHeight)
+  ```
+
+  A sub with no return ends after the description's spacer; a function with no params starts at the description.
 
 ### Type expressions
 

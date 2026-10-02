@@ -117,8 +117,10 @@ end sub
 SceneGraph has no built-in for this. Write it once, in a shared script every component imports:
 
 ```brighterscript
-' Binds each child id to m.nodes.<id>, for the nodes init() works with.
 ' @param {string[]} ids  ids from the component's <children>
+'
+' Binds each child id to m.nodes.<id>, for the nodes init() works with.
+'
 sub findNodes(ids)
     if m.nodes = invalid then m.nodes = {}
     for each id in ids
@@ -235,7 +237,9 @@ Comparing mismatched types, including against `invalid`, crashes BrightScript. G
 ```brighterscript
 namespace is
     ' @param {dynamic} value
+    '
     ' @return {boolean}
+    '
     function string(value)
         valueType = type(value)
         return valueType = "String" or valueType = "roString"

@@ -85,8 +85,10 @@ end sub
   `Config.*` / `Style.*` nodes, script creates and fills them too.
 
 ```brighterscript
-' Binds each child id to m.nodes.<id>.
 ' @param {string[]} ids  ids from the component's <children>
+'
+' Binds each child id to m.nodes.<id>.
+'
 sub getNodes(ids)
     if m.nodes = invalid then m.nodes = {}
     for each id in ids
@@ -146,7 +148,9 @@ end enum
   (`main`, framework seams); everyday code has few comments because names
   and small files carry the meaning.
 - JSDoc blocks are type declarations, not commentary, so every function
-  has one: a one-line intent, then its `@param` / `@return` types.
+  has one: its `@param` types, then a one-line intent, then `@return`,
+  each followed by a bare `'` line. The intent sits between the params
+  and the return because bsc's intellisense misreads it above the params.
 - Honest comments where reality bites — a known wart gets named, not
   hidden:
 
