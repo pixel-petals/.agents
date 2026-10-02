@@ -10,3 +10,5 @@
 - **Statelessness.** Programs do not keep a running track of changing states across different parts of the code. Every action is independent and relies only on the data explicitly passed into it.
   - Where state must be held, methods that only *read* it stay pure — free to return, compose, and be called anywhere.
   - Reserve writes for methods whose purpose *is* the notification, and keep those at the boundary. A method that both reads state and writes it is the one to look at twice.
+
+- **Decide, then Act.** Work out what changed as data first, in a pure function, then apply it and report it in a separate step. A loop that both decides and mutates (or decides and logs) becomes a pure diff followed by a short apply step.

@@ -15,6 +15,9 @@ A function covers more than one scope if any of these hold:
 - Two or more `continue` / `return` / `break` guards sit inside one loop body. Each guard encodes a separate rule about what qualifies; together they are a predicate wearing a disguise.
 - Nesting reaches two levels and the inner level filters before acting.
 - A line needs a comment to explain *why it is that way*. Extract it and let the function name carry the why.
+- A comment describes more than one behaviour. It is a table of contents: each sentence names a function, and the comment shrinks to the sequence of calls.
+
+**Any block is a function waiting for a name.** These triggers apply equally to a top-level script region, a loop body, a `try` body, or an `if` branch, not only to code already inside a function. A script region introduced by a comment is the strongest signal: the comment is the missing function name.
 
 The rewrite is always the same shape: name each part after the **decision it makes**, not the mechanics it performs. `isOwnProperty` over `hasOwn`, `bindableMethod` over `getMethod`. A well-named extraction turns a guard into a sentence and deletes the comment that would have explained it.
 

@@ -9,6 +9,10 @@
 | [Between any two functions](#between-functions--always-one-blank-line)                               | One blank line                             |
 | [Guard clause vs. main body](#inside-functions--blank-lines-separate-logical-phases)                 | One blank line                             |
 | [Multi-part guard condition](#naming-inline-guard-conditions)                                        | Name it with a `const`                     |
+| [Multi-part branch condition](#every-branch-condition-not-only-guards)                               | Name it with a `const`                     |
+| [Expression read twice](#name-a-repeated-read)                                                       | Name it with a `const`                     |
+| [Statements per line](#one-line-one-action)                                                          | One action; loops never one-line           |
+| [`try` / `catch`](#keep-try-narrow)                                                                  | Wrap one operation; rethrow the rest       |
 | [Logical phases inside a function](#inside-functions--blank-lines-separate-logical-phases)           | One blank line                             |
 | [Semantic groups inside an object literal](#inside-object-literals--blank-lines-group-semantic-keys) | One blank line                             |
 | [Import groups](#imports--blank-lines-separate-import-groups-by-layer)                               | One blank line between groups              |
@@ -136,6 +140,66 @@ if (isMissing || !isAdmin) return
 ```
 
 When a later clause depends on an earlier one, leave it in the guard or split into sequential guards, so the dependency is enforced by control flow.
+
+### Every branch condition, not only guards
+
+The naming rule applies to every `if`, `else if`, ternary and `while` condition, not only early returns. A branch condition with two or more parts gets a name, the same as a guard.
+
+### Name a repeated read
+
+An expression read twice in one block gets a `const`. A lookup that doesn't change inside a loop is computed once, above the loop, and named for what it holds:
+
+```js
+const knownTypeNames = new Set(Object.values(schema.types))
+
+for (const [key, name] of Object.entries(previous.types)) {
+  const current = schema.types[key]
+  const isRetired = current === undefined && !knownTypeNames.has(name)
+  ...
+}
+```
+
+---
+
+## One Line, One Action
+
+A line does one of three things: control flow, a mutation, or a call with a side effect.
+
+- `if (x) return`, `continue` and `break` may share a line with their condition.
+- A loop body never shares the loop's line. [Compact loop syntax](#compact-loop-syntax) is the only exception.
+- No assignment inside an expression. `(map[k] ??= []).push(v)` is two lines.
+- If any branch of an `if / else` chain has braces, every branch does. A body on its own line always has braces.
+
+```js
+// before
+for (const [name, parent] of Object.entries(previous.type_parents ?? {})) schema.type_parents[name] ??= parent
+
+// after
+for (const [name, parent] of Object.entries(previous.type_parents ?? {})) {
+  schema.type_parents[name] ??= parent
+}
+```
+
+---
+
+## Error Handling
+
+### Keep `try` narrow
+
+A `try` wraps only the operation that is expected to fail. The `catch` checks for that failure and rethrows anything else, so a logic bug is never swallowed as the expected case.
+
+```js
+function readPreviousSchema(path) {
+  try {
+    return JSON.parse(readFileSync(path, 'utf-8'))
+  } catch (err) {
+    if (err.code === 'ENOENT') return null
+    throw err
+  }
+}
+```
+
+A `catch` with no binding is allowed only around a single expression.
 
 ---
 
