@@ -50,6 +50,7 @@ Device-tested behaviour of the nodes that play animation and sound. The full wri
 - **Fix:** stack two nodes and swap the hidden one, showing it once it reports `decode` (`first` under no play command). Verified in Motion on OS 16: state changes and live patches swap with no blank frame.
 - **A patch to a finished clip** can keep its last frame on screen: play the new file in the hidden node and swap at its own `stop`.
 - **Setting the same uri is ignored.** **`mimeType` then `uri`** switches format live.
+- **A uri shown before brings back its old frames,** even after the file is deleted and rewritten: the node keeps its decode per uri. Give every generated file a new name; alternating two names shows stale data from the third write on.
 
 ### Lottie features that fail
 

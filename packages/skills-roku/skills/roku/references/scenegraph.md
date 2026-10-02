@@ -216,6 +216,8 @@ Checked on a device (Roku Ultra, OS 16):
 - **Reserved words go beyond the obvious:** `run`, `step` and `goTo` (as `goto`) cannot name functions or locals.
 - **A Label with a `height` clips its last line to an ellipsis** when the font's line height runs taller than expected. Leave `height` at 0 to let a wrapping Label grow.
 - **A Label's line advance is the font's own line height plus `lineSpacing`.** To match a design's line height, measure the font: register it with `roFontRegistry` (`getFamilies()` before and after names the new family), then `getFont(family, size, false, false).getOneLineHeight()`, and set `lineSpacing` to the difference.
+- **`roFontRegistry` exists only on the main and task threads.** On the render thread (any component's own code) `createObject` logs "MAIN|TASK-only component failed on RENDER thread" and returns `invalid`. Measure in a Task and pass the number over.
+- **A key shadows an associative array's own method.** With a key `count`, `table.count()` calls the stored value and crashes ("Function Call Operator ( ) attempted on non-function"); likewise `keys`, `append`, `doesExist`. For tables keyed by content (input, state or layer names), test emptiness with `for each` and track counts yourself.
 
 ## Tasks
 
