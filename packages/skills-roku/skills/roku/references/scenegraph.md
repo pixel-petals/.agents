@@ -202,6 +202,20 @@ end namespace
 - **Observers are registered as the last step of `init()`,** with `observeFieldScoped`, never XML `onChange`: an observer set earlier can fire before `init` has finished assigning `m`. A helper such as `setupObservers()` is optional; the order is the rule.
 - **Re-binding a node's observers:** unobserve the old node's fields, then observe the new one's, from the same field → callback table.
 - **`alwaysNotify="true"`** on fields that carry commands (`control`), so re-sending the same value fires.
+- **Observers on another component can run inside the assignment.** Setting a child's `control` ran its observer, which set its `playback`, which ran the parent's observer, all before the next line. Set up anything those observers read before the assignment that triggers them.
+- **An unset `assocarray` field reads as `invalid`,** not `{}`: check `is.valid(node.field)` before `.count()`.
+
+## Runtime facts
+
+Checked on a device (Roku Ultra, OS 16):
+
+- **An associative-array literal lowercases its keys:** `{ Next: true }` holds `next`. Lookups ignore case, but `=` on strings does not, so compare names with `lcase()` on both sides.
+- **BrightScript strings have no escapes.** `"\"` is a single backslash; a quote is `chr(34)`.
+- **`FormatJSON` takes only arrays and associative arrays.** Wrap a scalar, `FormatJSON([value])`, and strip the brackets.
+- **`setFields` is a node method.** On an associative array it fails at runtime ("Member function not found"); assign members one by one.
+- **Reserved words go beyond the obvious:** `run`, `step` and `goTo` (as `goto`) cannot name functions or locals.
+- **A Label with a `height` clips its last line to an ellipsis** when the font's line height runs taller than expected. Leave `height` at 0 to let a wrapping Label grow.
+- **A Label's line advance is the font's own line height plus `lineSpacing`.** To match a design's line height, measure the font: register it with `roFontRegistry` (`getFamilies()` before and after names the new family), then `getFont(family, size, false, false).getOneLineHeight()`, and set `lineSpacing` to the difference.
 
 ## Tasks
 

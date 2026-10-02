@@ -145,6 +145,7 @@ end namespace
 - **Computed keys** take a string enum member, a string const or a string literal (`["Content-Type"]`). Numeric members, numbers and runtime variables are errors.
 - **Complex consts are inlined as a new literal at every reference.** `for each k in BIG_MAP` then `BIG_MAP[k]` builds the AA once per reference, so read it into a local first in loops.
 - **A local variable silently shadows a const of the same name, in any case.** `trailer = createObject("roByteArray")` then `trailer.push(TRAILER)` pushed the byte array itself: the const was not inlined and nothing was reported. bsc inlines the const only where the local is not yet assigned, which is fragile. Never give a local a const's name.
+- **A local silently shadows a namespace too.** `color = invalid` then `color = color.resolve(x)` compiled to a method call on the local, with no diagnostic, and crashed on the device ("'Dot' Operator attempted with invalid"). Never give a local a namespace's name; `grep` the `.brs` output for `<namespace>.` to catch one.
 - **Hex consts work:** `const TRAILER_INTRODUCER = &h3B`.
 
 ## Operators and literals

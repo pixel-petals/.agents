@@ -47,12 +47,15 @@ Device-tested behaviour of the nodes that play animation and sound. The full wri
 ### Swapping uri
 
 - **The node clears on every swap:** it drops to `downloading` at 0×0, and reaches `decode` 4–30 ms later from `pkg:/` (about 70 ms for a file's first load). Screenshots caught the cell blank, sometimes after `decode` was already reported.
-- **Fix:** stack two nodes and swap the hidden one, showing it once it reports `decode`.
+- **Fix:** stack two nodes and swap the hidden one, showing it once it reports `decode` (`first` under no play command). Verified in Motion on OS 16: state changes and live patches swap with no blank frame.
+- **A patch to a finished clip** can keep its last frame on screen: play the new file in the hidden node and swap at its own `stop`.
 - **Setting the same uri is ignored.** **`mimeType` then `uri`** switches format live.
 
 ### Lottie features that fail
 
 Every Lottie file reaches `decode` with no `error`, even one that draws nothing, so check files before they ship.
+
+- **`ty` must come before an object's other keys.** A Lottie written back with `FormatJSON`, which sorts keys, draws nothing, with no error. The same file with `ty` moved first draws, though every other key stays sorted. Edit Lottie JSON as text, or serialise it with `ty` first.
 
 | Feature | Device behaviour | Preprocess fix |
 | --- | --- | --- |
