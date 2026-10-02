@@ -5,7 +5,8 @@ BrighterScript is a superset of BrightScript that compiles to it. v1 adds a real
 ## Version
 
 - **Pin `brighterscript` to an exact v1 alpha** in the package that builds (`"brighterscript": "1.0.0-alpha.56"`). npm's `latest` tag is still v0 (0.73), so an unpinned `npx bsc` resolves v0 and none of the typing below exists.
-- **v1 moved compiler options under `compilerOptions`.** Top-level `autoImportComponentScript`, `strict` and the rest still work but warn `deprecated-bsconfig-option`.
+- **v1 moved compiler options under `compilerOptions`.** Top-level `autoImportComponentScript`, `strict` and the rest still work but warn `deprecated-bsconfig-option`. **alpha.52 and older ignore the `compilerOptions` block entirely**: autoImport is off, so every `.bs` warns `file-not-referenced`, and `strict` is off.
+- **Point the editor at the pinned bsc.** The VS Code extension uses `brightscript.bsdk`, which a user-level setting can pin to an older alpha. Set it per workspace in `.vscode/settings.json` (`"brightscript.bsdk": "node_modules/brighterscript"`), and keep every Roku project in the repo on the same version so one bsdk serves them all.
 
 ## Types
 
@@ -59,9 +60,9 @@ end namespace
 bsc does not narrow a union or a nullable through runtime checks:
 
 ```brighterscript
-entry = findState(states)          ' motion.machine.State or invalid
+entry = findState(states)          ' machine.State or invalid
 if not is.invalid(entry)
-    typecast entry as motion.machine.State   ' must open the block
+    typecast entry as machine.State   ' must open the block
     count = entry.transitions.count()
 end if
 ```
@@ -82,19 +83,31 @@ Verified diagnostics, each from real mistakes:
 ## Namespaces
 
 ```brighterscript
-namespace motion.fit
+namespace fit
     function bounds(size, mediaWidth, mediaHeight)
-        ' callers write motion.fit.bounds(...); it transpiles to motion_fit_bounds(...)
+        ' callers write fit.bounds(...); it transpiles to fit_bounds(...)
     end function
 end namespace
 ```
 
+### Choosing names
+
+A namespace is a meaningful grouping, for autocomplete and for reading: `is.string(x)`, `log.warn(…)`, `fit.bounds(…)`. Its name is short and says what it groups.
+
+- **No app or library prefix by default.** `motion.fit.bounds` gives nothing over `fit.bounds`, and every call site pays for it. A component's scripts compile into that component's own scope, so a short name only has to be unique among the scripts it imports.
+- **A library prefix is for libraries shipped into other channels' `source/`** (roku-toolkit's `roToolbelt`, `roAsync`, …), where a host app's own `is` or `log` could collide. There it is one short top-level name, not a path mirroring the folder tree.
+- **One level deep.** Nest (`a.b.c`) only when the middle level is itself a grouping a caller would browse.
+- **A short shared prefix suits a shared vocabulary:** `ro.` for the strings of Roku's built-in nodes (`ro.TimerControl.START`, `ro.DisplayMode.SCALE_TO_FIT`). A component's contract types can sit under its name (`motion.Media`, `motion.Playback`). Avoid `type.`, which reads like the built-in `type()`.
+- **The test:** when one name keeps appearing as the first segment of every call, it is noise. Drop it.
+
+### Behaviour
+
 - **Dots become underscores** in the output. Functions in the same namespace call each other unqualified.
-- **Parent namespaces are not in scope:** inside `motion.fit`, a member of `motion` needs its full name.
-- **Strings are never rewritten.** `observeFieldScoped("field", "motion.fit.onX")` looks up a function that does not exist. Keep string-named entry points top-level, or pass the transpiled name (`"motion_fit_onX"`). roku-kit instead passes a function reference and converts it at runtime with `ref.toStr().replace("Function: ", "")`.
-- **Prefix every namespace in library code** with the library name, so a host channel's own `fit` or `is` cannot collide.
+- **Parent namespaces are not in scope:** inside `motion.fit`, a member of `motion` needs its full name. One more reason to keep namespaces one level deep.
+- **Strings are never rewritten.** `observeFieldScoped("field", "fit.onX")` looks up a function that does not exist. Keep string-named entry points top-level, or pass the transpiled name (`"fit_onX"`). roku-kit instead passes a function reference and converts it at runtime with `ref.toStr().replace("Function: ", "")`.
 - **A namespace and a type cannot share a name, case-insensitively.** `interface Machine` beside `namespace machine` in the same parent is a `name-collision` error.
-- **Type keywords parse as types:** inside `namespace motion.is`, a bare call `integer(value)` is `not-callable`. Call it fully qualified, as `motion.is.integer(value)`.
+- **Type keywords parse as types:** inside `namespace is`, a bare call `integer(value)` is `not-callable`. Call it fully qualified, as `is.integer(value)`.
+- **Reserved words as namespaced function names:** `function invalid(value)` inside `namespace is` raises `cannot-use-reserved-word`, but it transpiles to `is_invalid`, which is legal at runtime. Suppress it on the declaration (`' bs:disable-line: cannot-use-reserved-word`); calls to `is.invalid(x)` compile cleanly. Statement keywords (`stop`, `next`, `end`) are parse errors and cannot be used at all.
 - **`alias get2 = get`** (from the docs) gives a shadowed namespace a usable name.
 
 ## Enums, constants and computed keys

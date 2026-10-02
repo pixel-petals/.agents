@@ -21,13 +21,13 @@ BrighterScript v1 is a type checker as much as a compiler: write code it can che
 
 ### Files and names
 
-- **Functions are grouped in namespaces,** in components and `source` utilities alike, prefixed with the library or app name (`motion.fit.bounds`) so code embeds in any channel without collisions. Classes are for value objects (a Promise, a pool), not for grouping functions.
+- **Functions are grouped in namespaces,** in components and `source` utilities alike. A namespace is a short, meaningful grouping (`is.string`, `log.warn`, `fit.bounds`), not a path: don't prefix everything with the app or library name (`motion.fit.bounds`). A library prefix belongs only on code shipped into other channels' `source/` (roku-toolkit's `roToolbelt`, `roAsync`); `ro.` suits Roku built-in vocabularies. See [brighterscript.md](references/brighterscript.md#choosing-names). Classes are for value objects (a Promise, a pool), not for grouping functions.
 - **Top-level functions are the entry points SceneGraph names by string:** `init`, observer callbacks, a Task's `functionName`, `<function>` callFunc targets. bsc never rewrites namespaced names inside strings. Callbacks registered by function reference (hooks, an `observe()` helper) can be any namespaced function.
 - **Files are lowercase,** XML included (`action.fetch.xml` holding `<component name="Action.Fetch">`), because not every file system is case-sensitive. In a project whose XML files are already PascalCase, match the project.
 - **Each component has a `<name>.type.bs` sidecar** holding its `m` interface, node interfaces and enums. Every script that touches `m` starts with `typecast m as <ns>.Scope`.
 - **String vocabularies are enums** (`Playback.FINISHED = "finished"`), and maps keyed by them use computed keys (`[Playback.FINISHED]: …`).
-- **Names are case-insensitive everywhere.** An interface `motion.Machine` collides with a namespace `motion.machine`. **A local variable silently shadows a const of the same name**: the const stops inlining, with no diagnostic. Never give a local a const's name in any case.
-- **Keywords and built-ins are off-limits as function names,** even in a namespace: `stop` and `next` are parse errors, and a top-level `run` is silently replaced by the built-in `Run()`.
+- **Names are case-insensitive everywhere.** An interface `Machine` collides with a namespace `machine`. **A local variable silently shadows a const of the same name**: the const stops inlining, with no diagnostic. Never give a local a const's name in any case.
+- **Keywords and built-ins are off-limits as function names,** even in a namespace: `stop` and `next` are parse errors, and a top-level `run` is silently replaced by the built-in `Run()`. The exception is a guard named `invalid` inside a namespace (`is.invalid`): bsc reports `cannot-use-reserved-word`, but the name transpiles to `is_invalid`, so suppress it on that line, as roku-kit does.
 
 ### Components
 
