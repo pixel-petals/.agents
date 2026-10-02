@@ -1,6 +1,6 @@
 # SceneGraph Components, Typed
 
-How a component is laid out so bsc v1 can check it, taken from the Motion component (`roku.rive-adapter/src/roku`). Architecture and framework patterns (screens, gateways, focus, the async wrapper) are `roku-standards`' domain.
+How a component is laid out so bsc v1 can check it, taken from the Motion component (`roku.rive-adapter/src/roku`). Architecture and framework patterns (screens, gateways, focus, the async wrapper) are the `roku-standards` skill's domain.
 
 ## One component
 
@@ -73,6 +73,66 @@ end namespace
 - **Declare every `m` field in the Scope interface,** including ones set to `invalid` at first. bsc flags assignments of the wrong type (`m.count = "x"` against `count as integer`).
 - **Entry points (`init`, observer callbacks) stay top-level and short:** they read the event, then call into the namespace.
 
+## Structure in XML, values in init
+
+The XML says what the component is made of; `init()` says how it looks and behaves.
+
+```xml
+<component name="topicsCard" extends="NewBaseCard">
+    <interface>
+        <!-- { listing_id, chapter_id, progress } for this topic, or invalid to clear -->
+        <function name="setProgress" />
+        <function name="isTopic" />
+    </interface>
+
+    <children>
+        <topicRow id="topicRow" />
+        <Group id="topicProgress">
+            <BaseProgressBar id="topicProgressBar" />
+        </Group>
+    </children>
+</component>
+```
+
+```brighterscript
+sub init()
+    findNodes([
+        "topicRow"
+        "topicProgress"
+        "topicProgressBar"
+    ])
+
+    m.nodes.topicProgress.translation = [0, 180]
+    m.nodes.topicProgressBar.width = 320
+end sub
+```
+
+- **`<children>` holds node types, ids and nesting.** Leave out field values (`translation`, `focusable`, `width`, `color`, `text`, `visible`, …): they are rarely static over a component's life, so they belong in the script, where they can change, be computed, themed or typed. The XML stays a readable outline of the hierarchy.
+- **Every node `init()` touches has an id,** and is listed once in `findNodes`.
+- **Bind into `m.nodes.*` by default:** one bag holds every node reference, so a debugger shows them together, apart from component state. In a legacy project whose code already reads `m.topicRow`, bind onto `m.<id>` instead, and match whichever the project uses.
+- **Declare the nodes in the component's Scope interface,** as a `nodes` member typed by a small interface (`topicRow as roSGNodeGroup`, …), so `typecast m` types them.
+
+### findNodes
+
+SceneGraph has no built-in for this. Write it once, in a shared script every component imports:
+
+```brighterscript
+' Binds each child id to m.nodes.<id>, for the nodes init() works with.
+' @param {string[]} ids  ids from the component's <children>
+sub findNodes(ids)
+    if m.nodes = invalid then m.nodes = {}
+    for each id in ids
+        node = m.top.findNode(id)
+        if node = invalid then print "findNodes: no node with id "; id
+        m.nodes[id] = node
+    end for
+end sub
+```
+
+- **It runs in the calling component's scope,** so `m` and `m.top` are that component's.
+- **A missing id is reported, not silently stored as `invalid`.** Use the project's logging helper in place of `print`.
+- **Name it after the project's existing helper** if there is one: roku-standards' examples call it `getNodes`. For a legacy project binding onto `m.<id>`, store `m[id] = node` instead.
+
 ## Typing nodes
 
 ### Your own components
@@ -91,6 +151,7 @@ end interface
 
 - **Match the XML's field types exactly.** The real node type is checked against the interface wherever one is assigned to the other, so a field typed as an enum where the XML says `string` is an `assignment-type-mismatch`. Name the enum in a comment instead.
 - **Undotted component names** get a usable type directly: `roSGNodeMyWidget`.
+- **File names are lowercase** (`lottie.xml` holds `Motion.Lottie`), because not every file system is case-sensitive; match the project instead if its XML files are already PascalCase.
 
 ### Nodes bsc does not know
 
@@ -136,7 +197,7 @@ end namespace
 
 ## Observers and init
 
-- **`observeFieldScoped` is the last step of `init()`,** never XML `onChange`: an observer set earlier can fire before `init` has finished assigning `m`.
+- **Observers are registered as the last step of `init()`,** with `observeFieldScoped`, never XML `onChange`: an observer set earlier can fire before `init` has finished assigning `m`. A helper such as `setupObservers()` is optional; the order is the rule.
 - **Re-binding a node's observers:** unobserve the old node's fields, then observe the new one's, from the same field → callback table.
 - **`alwaysNotify="true"`** on fields that carry commands (`control`), so re-sending the same value fires.
 

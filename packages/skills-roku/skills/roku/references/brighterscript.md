@@ -60,7 +60,7 @@ bsc does not narrow a union or a nullable through runtime checks:
 
 ```brighterscript
 entry = findState(states)          ' motion.machine.State or invalid
-if entry <> invalid
+if not is.invalid(entry)
     typecast entry as motion.machine.State   ' must open the block
     count = entry.transitions.count()
 end if
@@ -130,7 +130,7 @@ end namespace
 | `node@.fn(a)` | `node.callfunc("fn", a)` | With no arguments `invalid` is passed, so the target needs one dynamic parameter |
 | `try … catch` (no variable) | `catch e` | — |
 | `SOURCE_LINE_NUM`, `FUNCTION_NAME`, `PKG_PATH`, … | String or number literals | `FUNCTION_NAME` gives the transpiled `ns_fn` name |
-| `x?.y` | Itself, natively | Native from Roku OS 11 only; gated by `minFirmwareVersion` |
+| `x?.y` | Itself, natively | Native from Roku OS 11; safe with `minFirmwareVersion` at 11 or above |
 
 - **`bslib.brs`** is emitted to `source/` and added to every component that uses it, even in a library with no `source/` folder of its own.
 
@@ -143,7 +143,7 @@ end namespace
 ## Classes
 
 - **Classes compile to builder functions over AAs:** `new Person()` becomes `Person()`. Methods bind `m` only when called through the instance; a method lifted off the object sees the caller's `m`.
-- **Prefer namespaced functions over classes for component logic.** Node fields copy AAs, and functions inside them are not expected to survive the copy (not tested here), so instances do not travel between components or threads.
+- **Namespaces group functions; classes are for value objects** such as a Promise or a pool. For grouping, in components and `source` utilities alike, use namespaces. Node fields copy AAs, and functions inside them are not expected to survive the copy (not tested here), so instances do not travel between components or threads.
 
 ## bsconfig
 
@@ -155,7 +155,7 @@ end namespace
     "autoImportComponentScript": true,  // x.xml picks up x.bs
     "strict": true,                     // strictCallFunc + strictNodeMembers
     "pruneEmptyCodeFiles": true,        // drop type-only scripts
-    "minFirmwareVersion": "10.0.0"      // `?.` becomes an error below 11
+    "minFirmwareVersion": "11.0.0"      // `?.` is native from OS 11; newer syntax is flagged
   }
 }
 ```
