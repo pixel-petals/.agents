@@ -1,6 +1,6 @@
 ---
 name: vscode-sync
-description: Keeps .vscode/launch.json (including compounds that start a project's servers together) and .vscode/tasks.json in step with package.json scripts. Use whenever a package.json `scripts` entry is added, renamed, removed, or changed (root or any workspace package), including passthru scripts added for a new workspace package, and whenever editing .vscode launch configs, compounds, or tasks, or adding, removing, or moving a git submodule (package.code-workspace).
+description: Keeps .vscode/launch.json (including compounds that start a project's servers together) and .vscode/tasks.json in step with package.json scripts. Use whenever a package.json `scripts` entry is added, renamed, removed, or changed (root or any workspace package), including passthru scripts added for a new workspace package, and whenever editing .vscode launch configs, compounds, or tasks, or adding, removing, or moving a git submodule, or replacing an org submodule with a `github:` dependency (package.code-workspace).
 ---
 
 # VS Code ↔ npm Scripts Sync
@@ -106,25 +106,24 @@ Watchers that only report problems, such as `tsc --watch`, don't belong in a com
 
 ## Workspace file
 
-Every repo has a `package.code-workspace` at its root, which opens the repo and each of its submodules as its own folder.
+Every repo has a `package.code-workspace` at its root, which opens the repo and each of its third-party submodules as its own folder.
 
 ```jsonc
 {
   "folders": [
     { "name": "app.example", "path": "." },
-    { "name": "web.components", "path": "src/.submodules/web.components" },
-    { "name": "web.toolkit", "path": "src/.submodules/web.toolkit" }
+    { "name": "open-jev", "path": "src/.submodules/open-jev" }
   ]
 }
 ```
 
 - `folders[0]` is the repo root: `{ "name": "<repo name>", "path": "." }`.
 - After the root, list one folder for every submodule at any depth. Read `.gitmodules` recursively through nested submodules and dedupe by repository (the url's repo name). Keep the shallowest path. Name each folder after its repository, and use forward-slash paths relative to the root.
-- Order: org repos in dependency order (closest first), then third-party ones.
+- **No org repositories.** Other org repositories are `github:` dependencies, not submodules, linked to sibling checkouts through the git-ignored `package-local.json` (see the [monorepo-conventions](../monorepo-conventions/SKILL.md) skill). Where those checkouts sit differs per machine, so the committed workspace file doesn't list them. Open them in their own windows, or from the umbrella workspace that checks every repository out side by side.
 - Leave `settings` out unless something is needed there that `.vscode/settings.json` doesn't already cover.
-- Compounds that span folders go in the file's `launch.compounds`. They name each config with its folder: `{ "name": "CMS (worker :8787)", "folder": "app.block-cms" }`. Add one only when a project needs a process from a submodule running. Say why in a comment.
+- Compounds that span folders go in the file's `launch.compounds`. They name each config with its folder: `{ "name": "Docs (serve :8080)", "folder": "open-jev" }`. Add one only when a project needs a process from a submodule running. Say why in a comment.
 
-Keep the file in step with the submodules. When a submodule is added, removed, or moved, including one nested inside another submodule, update `folders`, and check that every workspace compound still names a folder and config that exist.
+Keep the file in step with the submodules. When a submodule is added, removed, or moved, including one nested inside another submodule, update `folders`, and check that every workspace compound still names a folder and config that exist. When an org submodule is replaced by a `github:` dependency, remove its folder and every compound entry naming it.
 
 ## On every script change
 
