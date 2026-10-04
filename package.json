@@ -1,12 +1,24 @@
 {
+  "metapak": {
+    "configs": [
+      "main"
+    ]
+  },
   "name": "@px-petals/org.agents",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "workspaces": [
     "packages/*",
     "utils/*"
   ],
   "scripts": {
+    "dependencies": "packager link || exit 0",
+    "metapak": "metapak-px",
     "version": "sync-version"
+  },
+  "devDependencies": {
+    "@px-petals/metapak-dependencies": "github:pixel-petals/.dependencies",
+    "@px-petals/tools.packager": "github:pixel-petals/tools.packager",
+    "metapak": "7.1.1"
   }
 }

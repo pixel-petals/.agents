@@ -7,7 +7,7 @@ How a component is laid out so bsc v1 can check it, taken from the Motion compon
 ```text
 components/motion/player/lottie/
   lottie.xml        <component name='Motion.Lottie'> — interface fields only, no logic
-  lottie.bs         entry points + namespace motion.lottie
+  lottie.bs         entry points + namespace lottie
   lottie.type.bs    m's interface, node interfaces, enums
 ```
 
@@ -16,7 +16,7 @@ components/motion/player/lottie/
 ```brighterscript
 import "pkg:/components/motion/player/player.type.bs"
 
-namespace motion.lottie
+namespace lottie
 
     ' AnimatedImage's `state`, as observed on device
     enum ImageState
@@ -26,8 +26,8 @@ namespace motion.lottie
     end enum
 
     interface Scope
-        top as motion.player.Node
-        image as motion.lottie.ImageNode
+        top as player.Node
+        image as lottie.ImageNode
         media as motion.Media
         hasEnded as boolean
     end interface
@@ -40,7 +40,7 @@ end namespace
 ```brighterscript
 import "pkg:/components/motion/player/lottie/lottie.type.bs"
 
-typecast m as motion.lottie.Scope
+typecast m as lottie.Scope
 
 sub init()
     m.image = m.top.createChild("AnimatedImage")
@@ -55,14 +55,14 @@ end sub
 ' ■■■■■■■■■
 
 sub onImageState()
-    if m.image.state = motion.lottie.ImageState.DECODE then motion.lottie.layout()
+    if m.image.state = lottie.ImageState.DECODE then lottie.layout()
 end sub
 
-namespace motion.lottie
+namespace lottie
 
     ' Fits the image into the requested bounds.
     sub layout()
-        fitted = motion.fit.bounds(m.top.size, m.media.width, m.media.height)
+        fitted = fit.bounds(m.top.size, m.media.width, m.media.height)
         m.image.setFields({ width: fitted.width, height: fitted.height })
     end sub
 
@@ -117,8 +117,10 @@ end sub
 SceneGraph has no built-in for this. Write it once, in a shared script every component imports:
 
 ```brighterscript
-' Binds each child id to m.nodes.<id>, for the nodes init() works with.
 ' @param {string[]} ids  ids from the component's <children>
+'
+' Binds each child id to m.nodes.<id>, for the nodes init() works with.
+'
 sub findNodes(ids)
     if m.nodes = invalid then m.nodes = {}
     for each id in ids
@@ -168,7 +170,7 @@ Then declare its fields as an interface extending the nearest base (`roSGNodeGro
 
 ```brighterscript
 interface Global extends roSGNodeNode
-    optional motionTask as motion.task.Node
+    optional motionTask as task.Node
     optional motionAudio as motion.AudioNode
 end interface
 ```
@@ -206,7 +208,7 @@ end namespace
 A long-lived task answers requests on the request node itself (the roku-kit Server pattern):
 
 ```brighterscript
-typecast m as motion.task.Scope
+typecast m as task.Scope
 
 sub init()
     m.port = createObject("roMessagePort")
@@ -219,7 +221,7 @@ end sub
 sub serve()
     while true
         event = wait(0, m.port)
-        if type(event) = "roSGNodeEvent" then motion.task.respond(event.getData())
+        if type(event) = "roSGNodeEvent" then task.respond(event.getData())
     end while
 end sub
 ```
@@ -233,9 +235,11 @@ end sub
 Comparing mismatched types, including against `invalid`, crashes BrightScript. Guard values from JSON, fields and callers with a shared namespace:
 
 ```brighterscript
-namespace motion.is
+namespace is
     ' @param {dynamic} value
+    '
     ' @return {boolean}
+    '
     function string(value)
         valueType = type(value)
         return valueType = "String" or valueType = "roString"
@@ -243,4 +247,4 @@ namespace motion.is
 end namespace
 ```
 
-Inside the namespace, call siblings fully qualified when their name is a type keyword (`motion.is.integer`), and narrow afterwards with `typecast` (see [brighterscript.md](brighterscript.md#narrowing)).
+Inside the namespace, call siblings fully qualified when their name is a type keyword (`is.integer`), and narrow afterwards with `typecast` (see [brighterscript.md](brighterscript.md#narrowing)).

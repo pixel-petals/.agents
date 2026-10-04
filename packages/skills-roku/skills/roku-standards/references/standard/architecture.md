@@ -106,6 +106,7 @@ Two consequences worth internalizing:
 
   ```brightscript
   ' @param {object} [args]
+  '
   sub Main(args = {})
       m.port = CreateObject("roMessagePort")
       m.screen = CreateObject("roSGScreen")
