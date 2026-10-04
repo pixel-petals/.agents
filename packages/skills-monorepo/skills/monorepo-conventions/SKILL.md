@@ -1,6 +1,6 @@
 ---
 name: monorepo-conventions
-description: Repo layout rules for this npm-workspaces monorepo, including what may sit at a package root (config only, code in src/). Use when naming a package or the repo root, creating a folder under a workspace root (src/apps, src/packages, src/plugins, src/utils, tests, tools), adding a git submodule or a shared tool from another org repo, choosing where build output, caches, logs, or temporary files go, adding files at a package root, or writing imports between files in a package.
+description: Repo layout rules for this npm-workspaces monorepo, including what may sit at a package root (config only, code in src/). Use when naming a package or the repo root, creating a folder under a workspace root (src/apps, src/packages, src/plugins, src/utils, tests, tools), depending on another org repository (`github:` dependencies, package-local.json links) or adding a third-party git submodule, choosing where build output, caches, logs, or temporary files go, adding files at a package root, or writing imports between files in a package.
 ---
 
 # Monorepo Conventions
@@ -91,31 +91,76 @@ Anything generated, temporary, or gitignored goes in a `.artifacts/<kind>/` fold
 
 `**/.artifacts/` is already gitignored. Don't add a new ignore pattern for output that could live there.
 
-## Git submodules → `src/.submodules/`
+## Other org repositories → `github:` dependencies
+
+Code from another org repository (the `tools/*` repos such as `shell.toolkit` and `web.toolkit`, or a shared app such as `app.block-cms`) is an npm dependency on that repository's **root** package, never a submodule:
+
+```sh
+npm install -D "@px-petals/shell.toolkit@github:pixel-petals/shell.toolkit"
+```
+
+```json
+{
+  "devDependencies": {
+    "@px-petals/shell.toolkit": "github:pixel-petals/shell.toolkit",
+    "@px-petals/web.toolkit": "github:pixel-petals/web.toolkit"
+  }
+}
+```
+
+- **Root only.** npm can't install a subfolder of a git repository, so depend on the provider's root package and import its sub-packages through the root's subpath `exports` (`@px-petals/web.toolkit/config/eslint`, `@px-petals/web.plugins/eslint.lit`) and run its root `bin`s (`ws-run`, `secrets`). Don't add `file:` dependencies or `workspaces` globs that reach into another repository's folders.
+- **Missing export?** If the provider's root doesn't expose what you need, add the subpath, `bin`, `files` entry and runtime dependencies there (in the provider's own repository), named after the sub-package: one subpath per sub-package, plus any deeper paths consumers use.
+- **`allow-git=all`** in `.npmrc` is required: npm 12 refuses git dependencies by default.
+- **`version`:** a repository that others depend on needs one in its root `package.json`; npm packs a git dependency and refuses a package without it. npm runs a git dependency's `prepare` after installing its devDependencies, so a build there is allowed. For the same reason `.npmrc` must not set `ignore-scripts=true`: it would skip that build, and the `dependencies` script below.
+- **Lockfile:** the lockfile pins the provider's commit as `git+ssh://git@github.com/pixel-petals/<repo>.git#<sha>`. Reinstall the dependency (`npm install -D "@px-petals/<name>@github:pixel-petals/<repo>"`) to move it to the provider's current `main`.
+- **CI:** every private org repository the install fetches, transitively, has to be named in `setup`'s `repositories` input. See the [github-ci](../github-ci/SKILL.md) skill.
+
+### Local links → `package-local.json`
+
+To work against sibling checkouts instead of the GitHub copies, each repository uses `@px-petals/tools.packager` and a git-ignored `package-local.json`:
+
+```json
+{
+  "scripts": {
+    "dependencies": "packager link || exit 0"
+  },
+  "devDependencies": {
+    "@px-petals/tools.packager": "github:pixel-petals/tools.packager"
+  }
+}
+```
+
+`package-local.json` sits beside the root `package.json`. Keys are package names as `package.json` declares them; values are the sibling checkout's folder, relative to the file:
+
+```json
+{
+  "links": {
+    "@px-petals/web.toolkit": "../../tools/web"
+  }
+}
+```
+
+- npm runs the root `dependencies` lifecycle script after every command that changes `node_modules` (`install`, `ci`, `update`, `uninstall`, …). `packager link` then swaps each installed copy named in `package-local.json` for a link (a junction on Windows) to the sibling checkout, so `package.json` and the lockfile never change. `|| exit 0` keeps `npm ci --omit=dev` working, where the bin isn't installed.
+- `.gitignore` lists `**/package-local.json` in its blacklist, beside `node_modules`. Without the file, as in CI or a standalone clone, `packager link` does nothing.
+- `packager scan [folder...]` writes `package-local.json` for every repository under the folders that depends on a package another one there provides, then links them. From the umbrella workspace, `npm run scan` does this for every checkout.
+- After editing `package-local.json` by hand, run `npx packager link`: a plain `npm install` that changes nothing skips the script. Delete the file and run `npm install` to go back to the GitHub copies.
+- A link exposes the sibling as it is, so a provider whose root exports a packed dist needs its build or watch running.
+- Don't use `npm link`, `file:` paths, or cross-repository workspaces for this: each either gets undone by the next install or leaks a local path into committed files.
+
+## Third-party code → `src/.submodules/`
+
+Code vendored from outside the org (a repository whose URL isn't under `pixel-petals`) can still be a git submodule:
 
 ```sh
 git submodule add -f <url> src/.submodules/<name>
 ```
 
-`<name>` is the repository name. Don't put submodules at the repo root or inside a workspace package.
+`<name>` is the repository name. Don't put submodules at the repo root or inside a workspace package. Never add an org repository as a submodule; depend on it as above.
 
 `-f` is required because `.gitignore` ignores every folder in `src/.submodules/`. That way, a folder that was never registered as a submodule can't be committed as plain files. Once a submodule is registered, git tracks it as a pointer to a commit, and the ignore rule doesn't affect it: new commits in the submodule still show up in `git status` and can be committed as usual. Don't remove the ignore rule to avoid needing `-f`.
 
-### Shared tools from other repositories
-
-A tool from another org repository (the `tools/*` repos, such as `shell.toolkit`) is consumed as a submodule plus a `file:` dependency on the package inside it:
-
-```sh
-git submodule add -f ../shell.toolkit.git src/.submodules/shell.toolkit
-npm install -D "@px-petals/shell.ws-run@file:src/.submodules/shell.toolkit/packages/ws-run"
-```
-
-- Use a relative URL (`../<repo>.git`), so it resolves against whichever remote the parent was cloned from.
-- `install-links=true` in `.npmrc` installs the package as a packed copy, not a symlink into the submodule.
-- After cloning, and after any submodule bump, run `git submodule update --init --recursive` before `npm ci`. `npm ci` fails on a missing `file:` folder.
-- npm packs a `file:` dependency by running its `prepare` in the package's own folder, before its `node_modules` exist, so a prepare-time build must use Node built-ins only. For the same reason `.npmrc` must not set `ignore-scripts=true`: it would skip that build.
-- Third-party install scripts are gated per package by npm's `allowScripts` in the root `package.json` (`npm install-scripts ls`, `approve`, `deny`). It does not gate a `file:` dependency's `prepare`, so review a submodule bump like any other code change.
-- A private submodule also has to be named in CI's `setup` `repositories` input. See the [github-ci](../github-ci/SKILL.md) skill.
+- After cloning, and after any submodule bump, run `git submodule update --init --recursive`.
+- Third-party install scripts are gated per package by npm's `allowScripts` in the root `package.json` (`npm install-scripts ls`, `approve`, `deny`). Review a submodule bump like any other code change.
 
 ## Import aliases → `#` subpath imports
 

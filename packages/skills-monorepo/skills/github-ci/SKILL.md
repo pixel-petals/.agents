@@ -34,7 +34,7 @@ jobs:
 
 Anything not specific to one repository lives in [pixel-petals/.devops](https://github.com/pixel-petals/.devops/tree/main/.github): composite actions under `.github/actions/<name>` and reusable workflows under `.github/workflows/<name>.yml`. Call them at `@main`. Its readme lists what exists.
 
-- **Set up through `setup`.** It checks out with a GitHub App token when `GH_DEVOPS_ID` and `GH_DEVOPS_SECRET` are passed, which is what reaches a private submodule, then installs Node and the locked dependencies. List the repository and every one its submodules reach in `repositories`. Without the secrets it uses the run's own token.
+- **Set up through `setup`.** When `GH_DEVOPS_ID` and `GH_DEVOPS_SECRET` are passed, it mints a GitHub App token and rewrites SSH GitHub URLs to HTTPS with it, which is what reaches a private org repository: the `github:` dependencies `npm ci` fetches (the lockfile records them as `git+ssh://git@github.com/…`), and any private submodule. It then checks out (submodules included), installs Node and the locked dependencies. List in `repositories` the repository itself plus every private org repository its install fetches, transitively: each `github:` dependency, the `github:` dependencies those install in turn (devDependencies too, when one builds in `prepare`), and `tools.packager`. Without the secrets it uses the run's own token.
 - **Prefer a reusable workflow** (`verify`, `visual`, `baselines`) to a job built from the same actions. Pass secrets with `secrets: inherit`.
 - **Write a local action only for what this repository alone needs.** If a second repository would copy it, add it to `.devops` instead.
 

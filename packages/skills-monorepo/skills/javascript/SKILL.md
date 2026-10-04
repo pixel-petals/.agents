@@ -52,12 +52,12 @@ Checking is deliberately loose. It catches wrong shapes and misspelled members, 
 
 ## Shared tsconfig
 
-Compiler options live once for the whole org, in the `tsconfig.base.json` of `@px-petals/web.config` (from the `web.toolkit` submodule). The repo's root `tsconfig.base.json` extends it and adds only `exclude`, which has to resolve from the repo root:
+Compiler options live once for the whole org, in `web.toolkit`'s config package, which its root exposes as `@px-petals/web.toolkit/config/tsconfig.base.json` (a `github:` dependency, see the [monorepo-conventions](../monorepo-conventions/SKILL.md) skill). The repo's root `tsconfig.base.json` extends it and adds only `exclude`, which has to resolve from the repo root:
 
 ```jsonc
 // tsconfig.base.json
 {
-  "extends": "@px-petals/web.config/tsconfig.base.json",
+  "extends": "@px-petals/web.toolkit/config/tsconfig.base.json",
   "exclude": ["**/node_modules", "**/.artifacts"]
 }
 ```
@@ -109,13 +109,13 @@ Each package defines the scripts that apply to it, and the root runs them across
 | `test`         | `vitest run`   | `npm test`          | every package's `test`               |
 | —              | —              | `npm run lint`      | `eslint .` once, from the root       |
 
-The root `typecheck` and `test` call `ws-run <script>` (`@px-petals/shell.ws-run`, from the `shell.toolkit` submodule), which runs the script in every workspace that defines it and skips while no workspace package exists yet. Plain `npm run --workspaces` fails in that state.
+The root `typecheck` and `test` call `ws-run <script>` (a bin of `@px-petals/shell.toolkit`, a `github:` dependency), which runs the script in every workspace that defines it and skips while no workspace package exists yet. Plain `npm run --workspaces` fails in that state.
 
-Lint runs once from the root, because the one flat `eslint.config.js` already covers every package. It builds on `config()` from `@px-petals/web.config/eslint`, whose options cover the usual differences (`ignores`, `globals`, `recommended`). A plugin or rule only this repo uses goes in a block after it:
+Lint runs once from the root, because the one flat `eslint.config.js` already covers every package. It builds on `config()` from `@px-petals/web.toolkit/config/eslint`, whose options cover the usual differences (`ignores`, `globals`, `recommended`). A plugin or rule only this repo uses goes in a block after it:
 
 ```js
 import { defineConfig } from 'eslint/config'
-import { config } from '@px-petals/web.config/eslint'
+import { config } from '@px-petals/web.toolkit/config/eslint'
 
 export default defineConfig([
   ...config({ ignores: [ '**/.wrangler/**' ] }),
@@ -125,4 +125,4 @@ export default defineConfig([
 
 Don't add a package-level ESLint config unless the package needs rules the rest of the repo doesn't.
 
-`typescript`, `vitest`, and `eslint` are root devDependencies, pinned exactly. Don't add them to a package. A package script finds them through the root `node_modules/.bin`. `@eslint/js`, `eslint-plugin-jsdoc`, and `globals` come with `@px-petals/web.config`, so don't add them anywhere.
+`typescript`, `vitest`, and `eslint` are root devDependencies, pinned exactly. Don't add them to a package. A package script finds them through the root `node_modules/.bin`. `@eslint/js`, `eslint-plugin-jsdoc`, and `globals` come with `@px-petals/web.toolkit`, so don't add them anywhere.
