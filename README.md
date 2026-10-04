@@ -69,3 +69,7 @@ packages/
 ```
 
 A rules plugin's `SessionStart` hook cats its rules into context, injecting them at the beginning of every session. A skills plugin has no hook: Claude Code lists each skill's `description` and loads the `SKILL.md` when a task matches it. Plugin skills are namespaced by plugin, e.g. `skills-monorepo:javascript`.
+
+## Dependencies
+
+Org repositories are `github:` dev dependencies, kept in step by the [`@px-petals/metapak-dependencies`](https://github.com/pixel-petals/.dependencies) metapak plugin (`main` config): run `npm run metapak` after changing it, and `npm install` with `allow-git=all` from [`.npmrc`](.npmrc). With sibling checkouts under one workspace, `npm run scan --prefix <workspace>` writes a git-ignored `package-local.json` that links them in place of the git copies.
