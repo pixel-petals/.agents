@@ -7,6 +7,10 @@
     "utils/*"
   ],
   "scripts": {
+    "dependencies": "packager link || exit 0",
     "version": "sync-version"
+  },
+  "devDependencies": {
+    "@px-petals/tools.packager": "github:pixel-petals/tools.packager"
   }
 }

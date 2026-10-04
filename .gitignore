@@ -90,6 +90,9 @@
 **/node_modules/
 **/roku_modules/
 
+# links this checkout's dependencies to sibling checkouts (packager)
+**/package-local.json
+
 # artifacts
 # ——————————————————————————————
 
