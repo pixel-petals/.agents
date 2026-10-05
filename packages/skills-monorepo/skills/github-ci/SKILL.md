@@ -23,8 +23,8 @@ jobs:
     steps:
       - uses: pixel-petals/.devops/.github/actions/setup@main
         with:
-          app-id: ${{ secrets.GH_DEVOPS_ID }}
-          private-key: ${{ secrets.GH_DEVOPS_SECRET }}
+          app-id: ${{ secrets.GH_DEVOPS_READER_ID }}
+          private-key: ${{ secrets.GH_DEVOPS_READER_KEY }}
           repositories: app.example, web.toolkit, shell.toolkit, tools.packager, .dependencies
       - uses: pixel-petals/.devops/.github/actions/npm-run@main
         with:
@@ -35,7 +35,7 @@ jobs:
 
 Anything not specific to one repository lives in [pixel-petals/.devops](https://github.com/pixel-petals/.devops/tree/main/.github): composite actions under `.github/actions/<name>` and reusable workflows under `.github/workflows/<name>.yml`. Call them at `@main`. Its readme lists what exists.
 
-- **Set up through `setup`.** When `GH_DEVOPS_ID` and `GH_DEVOPS_SECRET` are passed, it mints a GitHub App token and rewrites SSH GitHub URLs to HTTPS with it, which is what reaches a private org repository: the `github:` dependencies `npm ci` fetches (the lockfile records them as `git+ssh://git@github.com/…`), and any private submodule. It then checks out, installs Node and runs `npm ci`, whose `dependencies` script links the providers' shared packages. Without the secrets it uses the run's own token.
+- **Set up through `setup`.** When `GH_DEVOPS_READER_ID` and `GH_DEVOPS_READER_KEY` are passed, it mints a GitHub App token and rewrites SSH GitHub URLs to HTTPS with it, which is what reaches a private org repository: the `github:` dependencies `npm ci` fetches (the lockfile records them as `git+ssh://git@github.com/…`), and any private submodule. It then checks out, installs Node and runs `npm ci`, whose `dependencies` script links the providers' shared packages. Without the secrets it uses the run's own token.
 - **List every private org repository the install fetches in `repositories`,** transitively: the repository itself, each provider root it depends on (see the [monorepo-conventions](../monorepo-conventions/SKILL.md) skill), the org repositories those depend on in turn, and `tools.packager` and `.dependencies`, which every repository installs. A missing one fails `npm ci` with a git authentication error.
 - **Check the dependency wiring.** Add `metapak` to the checked scripts of every repository: under `CI` it exits 1 when the `@px-petals/metapak-dependencies` plugin would change anything. A provider also checks `hoist:check`, which exits 1 when its root `package.json` no longer matches its shared packages.
 - **Prefer a reusable workflow** (`verify`, `visual`, `baselines`) to a job built from the same actions. Pass secrets with `secrets: inherit`.
