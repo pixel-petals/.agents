@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const marketplacePath = path.resolve(__dirname, "../../../.claude-plugin/marketplace.json");
+const marketplacePath = path.resolve(__dirname, "../../../../.claude-plugin/marketplace.json");
 
 /** Syncs marketplace.json version to the given version string. */
 function syncMarketplace(version) {

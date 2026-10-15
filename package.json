@@ -8,8 +8,12 @@
   "version": "1.3.0",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "utils/*"
+    "src/.tests/*",
+    "src/apps/*",
+    "src/packages/*",
+    "src/plugins/*",
+    "src/tools/*",
+    "src/utils/*"
   ],
   "scripts": {
     "dependencies": "packager link || exit 0",

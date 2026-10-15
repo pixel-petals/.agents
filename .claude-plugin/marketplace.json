@@ -8,27 +8,27 @@
   "plugins": [
     {
       "name": "rules-code",
-      "source": "./packages/rules-code",
+      "source": "./src/packages/rules-code",
       "description": "Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules."
     },
     {
       "name": "rules-git",
-      "source": "./packages/rules-git",
+      "source": "./src/packages/rules-git",
       "description": "Git commit and pull request conventions."
     },
     {
       "name": "response-style-direct",
-      "source": "./packages/response-style-direct",
+      "source": "./src/packages/response-style-direct",
       "description": "How Claude formats its replies: lead with the answer, no filler, present tense."
     },
     {
       "name": "skills-monorepo",
-      "source": "./packages/skills-monorepo",
+      "source": "./src/packages/skills-monorepo",
       "description": "Monorepo skills: layout and naming, JavaScript and tsconfig, docs, GitHub CI, and VS Code script sync."
     },
     {
       "name": "skills-roku",
-      "source": "./packages/skills-roku",
+      "source": "./src/packages/skills-roku",
       "description": "Roku skills: roku-standards (architecture, framework patterns, anti-patterns), roku (BrighterScript v1 typing, device-tested media behaviour, testing on a real Roku) and roku-adopt (adoption-ladder audit)."
     }
   ]
