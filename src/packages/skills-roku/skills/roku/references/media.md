@@ -1,6 +1,6 @@
 # Media on Roku
 
-Device-tested behaviour of the nodes that play animation and sound. The full write-ups, with every test case, are in the `roku.rive-adapter` repo: `src/docs/ROKU-LOTTIE.md` and `src/docs/ROKU-AUDIO.md`.
+Device-tested behaviour of the nodes that play animation and sound. The full write-ups, with every test case, are in the `roku.rive-adapter` repo: `src/.docs/ROKU-LOTTIE.md` and `src/.docs/ROKU-AUDIO.md`.
 
 - **Test devices:** Roku Ultra 4850CA on OS 16.0.4 and on OS 15.3.4, 1080p.
 - **Unverified:** other models and OS versions, unless stated.
