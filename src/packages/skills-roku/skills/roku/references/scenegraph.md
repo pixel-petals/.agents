@@ -1,6 +1,6 @@
 # SceneGraph Components, Typed
 
-How a component is laid out so bsc v1 can check it, taken from the Motion component (`roku.rive-adapter/src/roku`). Architecture and framework patterns (screens, gateways, focus, the async wrapper) are the `roku-standards` skill's domain.
+How a component is laid out so bsc v1 can check it, taken from the Motion component (`roku.rive-adapter/src/packages/motion`). Architecture and framework patterns (screens, gateways, focus, the async wrapper) are the `roku-standards` skill's domain.
 
 ## One component
 

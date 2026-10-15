@@ -1,6 +1,6 @@
 ---
 name: monorepo-conventions
-description: Repo layout rules for this npm-workspaces monorepo, including what may sit at a package root (config only, code in src/). Use when naming a package or the repo root, creating a folder under a workspace root (src/apps, src/packages, src/plugins, src/utils, tests, tools), depending on another org repository (`github:` dependencies, sharing packages with `packager hoist`, `packager link`, package-local.json, the metapak plugin) or adding a third-party git submodule, choosing where build output, caches, logs, or temporary files go, adding files at a package root, or writing imports between files in a package.
+description: Repo layout rules for this npm-workspaces monorepo, including what may sit at a package root (config only, code in src/). Use when naming a package or the repo root, creating a folder under a workspace root (src/apps, src/packages, src/plugins, src/tools, src/utils, src/.tests), depending on another org repository (`github:` dependencies, sharing packages with `packager hoist`, `packager link`, package-local.json, the metapak plugin) or adding a third-party git submodule, choosing where build output, caches, logs, or temporary files go, adding files at a package root, or writing imports between files in a package.
 ---
 
 # Monorepo Conventions
@@ -17,12 +17,12 @@ The npm scope is the workspace root's folder name made singular. The package nam
 
 | Workspace root   | Scope      | Example folder         | Package name       | Root script       |
 | ---------------- | ---------- | ---------------------- | ------------------ | ----------------- |
+| `src/.tests/*`   | `@test`    | `src/.tests/example`   | `@test/example`    | `test:example`    |
 | `src/apps/*`     | `@app`     | `src/apps/example`     | `@app/example`     | `app:example`     |
 | `src/packages/*` | `@package` | `src/packages/example` | `@package/example` | `package:example` |
 | `src/plugins/*`  | `@plugin`  | `src/plugins/example`  | `@plugin/example`  | `plugin:example`  |
+| `src/tools/*`    | `@tool`    | `src/tools/example`    | `@tool/example`    | `tool:example`    |
 | `src/utils/*`    | `@util`    | `src/utils/example`    | `@util/example`    | `util:example`    |
-| `tests/*`        | `@test`    | `tests/example`        | `@test/example`    | `test:example`    |
-| `tools/*`        | `@tool`    | `tools/example`        | `@tool/example`    | `tool:example`    |
 
 ### Shared packages → `@px-petals/<area>.<name>`
 
@@ -65,7 +65,7 @@ src/apps/example/
 - **Allowed at the root:** `package.json`, `readme.md`, `tsconfig.json`, dotfiles and dot-folders (`.docs/`, `.artifacts/`, `.github/`, `.env.example`), and tool config files that the tool looks for at the package root (`*.config.js`, `wrangler.jsonc`).
 - **Everything else goes in `src/`**, even a package with a single file. Point `exports`, `main`, `bin`, and `imports` into it: `"exports": { ".": "./src/index.js" }`.
 - A tool config file stays config. If one grows helpers or logic, move them into `src/` and import them.
-- The repo root follows the same rule: its code lives in the workspace packages under `src/`, and the root holds only configuration.
+- The repo root follows the same rule: its code lives in the workspace packages under `src/`, and the root holds only configuration and `readme.md`. Repo-wide docs go in `src/.docs/` and cross-package test suites in `src/.tests/`, not in a root `.docs/` or `tests/`.
 
 ### Using the passthru
 

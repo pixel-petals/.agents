@@ -6,11 +6,11 @@ A plugin monorepo for AI coding agents. Each package is an installable plugin th
 
 | Plugin | Description |
 | --- | --- |
-| [`rules-code`](packages/rules-code/) | Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules |
-| [`rules-git`](packages/rules-git/) | Git commit and pull request conventions |
-| [`response-style-direct`](packages/response-style-direct/) | How Claude formats its replies: lead with the answer, no filler, present tense |
-| [`skills-monorepo`](packages/skills-monorepo/) | Skills for repos made from `.template`: `monorepo-conventions`, `javascript`, `docs`, `github-ci`, `vscode-sync` |
-| [`skills-roku`](packages/skills-roku/) | Roku skills: `roku-standards` (architecture, framework patterns, anti-patterns), `roku` (BrighterScript v1 typing, device-tested media behaviour, testing on a real Roku) and `roku-adopt` (adoption-ladder audit) |
+| [`rules-code`](src/packages/rules-code/) | Code formatting, legibility, principles, design patterns, planning, documentation, and testing rules |
+| [`rules-git`](src/packages/rules-git/) | Git commit and pull request conventions |
+| [`response-style-direct`](src/packages/response-style-direct/) | How Claude formats its replies: lead with the answer, no filler, present tense |
+| [`skills-monorepo`](src/packages/skills-monorepo/) | Skills for repos made from `.template`: `monorepo-conventions`, `javascript`, `docs`, `github-ci`, `vscode-sync` |
+| [`skills-roku`](src/packages/skills-roku/) | Roku skills: `roku-standards` (architecture, framework patterns, anti-patterns), `roku` (BrighterScript v1 typing, device-tested media behaviour, testing on a real Roku) and `roku-adopt` (adoption-ladder audit) |
 
 ## Installation
 
@@ -30,11 +30,11 @@ Add this repo as a marketplace source, then install individual plugins:
 Or install directly from a local clone:
 
 ```bash
-claude plugin install ./packages/rules-code
-claude plugin install ./packages/rules-git
-claude plugin install ./packages/response-style-direct
-claude plugin install ./packages/skills-monorepo
-claude plugin install ./packages/skills-roku
+claude plugin install ./src/packages/rules-code
+claude plugin install ./src/packages/rules-git
+claude plugin install ./src/packages/response-style-direct
+claude plugin install ./src/packages/skills-monorepo
+claude plugin install ./src/packages/skills-roku
 ```
 
 ### In a repository
@@ -59,13 +59,16 @@ A repository turns plugins on for everyone who works in it through its committed
 ## Structure
 
 ```text
-.claude-plugin/marketplace.json   ← marketplace catalog
-packages/
-  <plugin>/
-    .claude-plugin/plugin.json    ← installable manifest
-    hooks/hooks.json              ← SessionStart hook (emits rules to context)
-    rules/                        ← rule content
-    skills/<name>/SKILL.md        ← skills, loaded on demand
+.claude-plugin/marketplace.json     ← marketplace catalog
+src/
+  packages/
+    <plugin>/
+      .claude-plugin/plugin.json    ← installable manifest
+      hooks/hooks.json              ← SessionStart hook (emits rules to context)
+      rules/                        ← rule content
+      skills/<name>/SKILL.md        ← skills, loaded on demand
+  utils/
+    version/                        ← `npm version` hook syncing plugin versions
 ```
 
 A rules plugin's `SessionStart` hook cats its rules into context, injecting them at the beginning of every session. A skills plugin has no hook: Claude Code lists each skill's `description` and loads the `SKILL.md` when a task matches it. Plugin skills are namespaced by plugin, e.g. `skills-monorepo:javascript`.
