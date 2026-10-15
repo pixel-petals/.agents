@@ -9,7 +9,7 @@ Docs live with the code they describe, not in a central tree that mirrors the so
 
 ## Layout
 
-Every folder follows the same shape, from the repo root down to a single cluster:
+Every folder follows the same shape, from `src/` down to a single cluster:
 
 ```text
 parse/
@@ -37,11 +37,13 @@ parse/
 
 The `.` prefix sorts `.docs/` and `.tests/` to the top of the folder listing, above the code, and keeps them out of barrels and globs that skip dot-prefixed folders.
 
-The repo root follows the same rule: `readme.md` at the root, and repo-wide docs in `.docs/` once there is something to put there.
+The scheme holds at every depth. A folder of docs is always `.docs/` and a folder of tests is always `.tests/`, never `docs/`, `tests/`, `test/` or `__tests__/`.
+
+The repo root keeps only `readme.md`. Handwritten docs about the repo as a whole go in `src/.docs/`, and cross-package test suites in `src/.tests/`, so nothing but config sits beside `src/`.
 
 ## Placement
 
-- Put a doc in the deepest folder it applies to. A doc about one package belongs in that package, not in the root `.docs/`.
+- Put a doc in the deepest folder it applies to. A doc about one package belongs in that package, not in `src/.docs/`.
 - If a doc about one file grows to cover several, move it to `.docs/<topic>.md` and link to it from each file's doc.
 - Create `.docs/` only when a folder has something to put in it. Don't add empty doc folders.
 - When code moves, move its `readme.md`, `<file>.md` and `.docs/` with it.
