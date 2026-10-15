@@ -1,6 +1,12 @@
 
-# .gitignore patterns
-# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+# █
+# █ .gitignore
+# █
+# █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
+
+# How to Use
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 # Allowlist strategy: ignore everything, then explicitly allow what belongs.
 # This prevents accidental commits of new files or folders.
@@ -14,8 +20,8 @@
 #   /**     — everything inside
 #   a/**/b — anything between a and b
 
-# .gitignore rules
-# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# Rules
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 # ignore ALL files & folders
 *
@@ -29,7 +35,16 @@
 # root project files
 !/*.*
 !/LICENSE
-!/.git?* # allow .gitignore, .gitattributes, .gitmodules
+# allow .gitignore, .gitattributes, .gitmodules
+!/.git?*
+
+# continuous integration
+# ——————————————————————————————
+
+# workflows and the composite actions they call. Package-scoped actions live
+# under their own package and are already covered by its whitelist entry.
+!/.github/
+!/.github/**
 
 # IDE
 # ——————————————————————————————
@@ -46,11 +61,10 @@
 !/.claude*/
 !/.claude*/**
 
-# documentation
-# ——————————————————————————————
-
-!/docs/
-!/docs/**
+# ignore local overrides
+**/.claude/settings.local.json
+**/agent.local.md
+**/claude.local.md
 
 # source code
 # ——————————————————————————————
@@ -58,31 +72,15 @@
 !/src
 !/src/**
 
-# monorepo workspace folders
-# ------------------------------
-
-!/apps/
-!/apps/**
-
-!/packages/
-!/packages/**
-
-!/plugins/
-!/plugins/**
-
-!/utils/
-!/utils/**
+# Third-party submodules are registered with `git submodule add -f`; once
+# registered, this rule no longer applies to them. It stops an unregistered
+# folder being committed as ordinary files.
+/src/.submodules/*/
 
 # Blacklist
 # ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 **/.git
-
-# .env files
-# ——————————————————————————————
-
-**/.env*
-!**/.env*.example # allow example file
 
 # dependencies
 # ——————————————————————————————
@@ -98,13 +96,21 @@
 **/dist/
 **/out/
 
-# coding agents
+**/.wrangler/
+**/.dev.vars
+
+# secrets
 # ——————————————————————————————
 
-**/.claude/settings.local.json
+**/.env*
+**/.env*.bak
+# allow example file
+!**/.env*.example
 
-**/agent.local.md
-**/claude.local.md
+# Encrypted with age, so the ciphertext is safe to commit; the plaintext it
+# came from never is.
+!**/*.age
+!/.age-recipients
 
 # links this checkout's dependencies to sibling checkouts (packager)
 **/package-local.json
