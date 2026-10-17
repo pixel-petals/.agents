@@ -30,7 +30,7 @@ jobs:
           private-key: ${{ secrets.GH_DEVOPS_READER_KEY }}
           # this repository and every private org repository `npm ci` fetches,
           # transitively: its providers, tools.packager and .dependencies
-          repositories: ${{ github.event.repository.name }}, shell.toolkit, web.toolkit, tools.packager, .dependencies
+          repositories: ${{ github.event.repository.name }}, core.shell, core.web, util.packager, util.dependencies
 
       - uses: pixel-petals/.devops/.github/actions/npm-run@main
         with:
@@ -47,7 +47,7 @@ jobs:
         with:
           app-id: ${{ secrets.GH_DEVOPS_READER_ID }}
           private-key: ${{ secrets.GH_DEVOPS_READER_KEY }}
-          repositories: ${{ github.event.repository.name }}, shell.toolkit, web.toolkit, tools.packager, .dependencies
+          repositories: ${{ github.event.repository.name }}, core.shell, core.web, util.packager, util.dependencies
 
       - uses: pixel-petals/.devops/.github/actions/npm-run@main
         with:
